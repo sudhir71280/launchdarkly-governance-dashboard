@@ -3,7 +3,6 @@ import React from 'react';
 // AlertsSection: Displays governance alerts and insights
 // ---------------------------------------------
 import {
-  Paper,
   Typography,
   Alert,
   AlertTitle,
@@ -41,21 +40,21 @@ const getAlertIcon = (level) => {
 
 const AlertsSection = ({ alerts, metrics }) => {
   // Calculate ratios and averages for insights
-  const totalFlags = metrics.totalFlags || 0;
-  const activeFlags = totalFlags - (metrics.archivedFlags || 0);
-  const tempRatio = activeFlags > 0 ? ((metrics.temporaryFlags || 0) / activeFlags * 100) : 0;
-  const oldRatio = activeFlags > 0 ? ((metrics.ageDistribution?.['180+'] || 0) / activeFlags * 100) : 0;
-  const avgPriority = metrics.cleanupCandidates?.length > 0 
+  const totalFlags = metrics?.totalFlags ?? 0;
+  const activeFlags = totalFlags - (metrics?.archivedFlags ?? 0);
+  const tempRatio = activeFlags > 0 ? ((metrics?.temporaryFlags ?? 0) / activeFlags * 100) : 0;
+  const oldRatio = activeFlags > 0 ? ((metrics?.ageDistribution?.['180+'] ?? 0) / activeFlags * 100) : 0;
+  const avgPriority = metrics?.cleanupCandidates?.length > 0 
     ? metrics.cleanupCandidates.reduce((sum, flag) => sum + flag.priorityScore, 0) / metrics.cleanupCandidates.length 
     : 0;
 
+  const hasMetrics = totalFlags > 0;
+
   return (
-  // Render alerts and governance insights
     <Box>
       <Typography variant="h6" gutterBottom>
         Governance Alerts
       </Typography>
-      
       {/* Alert Messages */}
       <Box sx={{ mb: 3 }}>
         {alerts && alerts.length > 0 ? (
@@ -82,62 +81,65 @@ const AlertsSection = ({ alerts, metrics }) => {
       <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
         Governance Insights
       </Typography>
-      
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h4" color="primary" gutterBottom>
-                {tempRatio.toFixed(1)}%
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Temporary Flags
-              </Typography>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                {tempRatio > 80 ? 'High ratio - monitor for permanent candidates' : 
-                 tempRatio > 60 ? 'Moderate ratio - regular review recommended' : 
-                 'Healthy ratio'}
-              </Typography>
-            </CardContent>
-          </Card>
+      {hasMetrics ? (
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h4" color="primary" gutterBottom>
+                  {tempRatio.toFixed(1)}%
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Temporary Flags
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  {tempRatio > 80 ? 'High ratio - monitor for permanent candidates' : 
+                   tempRatio > 60 ? 'Moderate ratio - regular review recommended' : 
+                   'Healthy ratio'}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h4" color="warning.main" gutterBottom>
+                  {oldRatio.toFixed(1)}%
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Flags {'>'} 180 days
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  {oldRatio > 20 ? 'High - immediate cleanup needed' : 
+                   oldRatio > 10 ? 'Moderate - schedule cleanup review' : 
+                   'Low - good maintenance'}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h4" color="error.main" gutterBottom>
+                  {avgPriority.toFixed(1)}/10
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Avg Priority Score
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  {avgPriority > 7 ? 'High - urgent attention needed' : 
+                   avgPriority > 4 ? 'Moderate - schedule maintenance' : 
+                   'Low - minimal action required'}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-        
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h4" color="warning.main" gutterBottom>
-                {oldRatio.toFixed(1)}%
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Flags {'>'} 180 days
-              </Typography>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                {oldRatio > 20 ? 'High - immediate cleanup needed' : 
-                 oldRatio > 10 ? 'Moderate - schedule cleanup review' : 
-                 'Low - good maintenance'}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h4" color="error.main" gutterBottom>
-                {avgPriority.toFixed(1)}/10
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Avg Priority Score
-              </Typography>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                {avgPriority > 7 ? 'High - urgent attention needed' : 
-                 avgPriority > 4 ? 'Moderate - schedule maintenance' : 
-                 'Low - minimal action required'}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      ) : (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          No governance metrics available. Please check your data source or refresh.
+        </Alert>
+      )}
     </Box>
   );
 };

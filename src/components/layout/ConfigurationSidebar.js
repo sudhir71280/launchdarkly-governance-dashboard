@@ -2,31 +2,9 @@ import React, { useState } from 'react';
 // ---------------------------------------------
 // ConfigurationSidebar: Sidebar for dashboard settings and filters
 // ---------------------------------------------
-import {
-  Box,
-  Typography,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  FormControlLabel,
-  Switch,
-  Slider,
-  Chip,
-  Button,
-  Divider,
-  IconButton,
-  FormGroup,
-  Checkbox,
-  Paper,
-  Alert,
-} from '@mui/material';
+import {  Box,  Typography,  Select,  MenuItem,  FormControl,  FormControlLabel,  Switch,  Slider,  Chip,  Button,  IconButton,  FormGroup,  Checkbox,  Paper,  Alert,} from '@mui/material';
 import { launchdarklyConfig } from '../../config/launchdarklyConfig';
-import {
-  Close,
-  Save,
-  Settings,
-} from '@mui/icons-material';
+import {  Close,  Save,  Settings,} from '@mui/icons-material';
 
 const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
   // Local state for form values and errors

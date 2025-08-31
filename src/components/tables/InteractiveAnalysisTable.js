@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Typography, Box, Chip, IconButton, Tooltip, Avatar } from '@mui/material';
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Typography, Box, Chip, Tooltip, Avatar } from '@mui/material';
 
 // Helper to generate a color from a string
 function stringToColor(str) {
