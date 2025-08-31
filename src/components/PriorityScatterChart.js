@@ -1,8 +1,12 @@
 import React from 'react';
+// ---------------------------------------------
+// PriorityScatterChart: Shows flag age vs. cleanup priority
+// ---------------------------------------------
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Paper, Typography, Box } from '@mui/material';
 
 const PriorityScatterChart = ({ flags }) => {
+  // Prepare chart data from flags
   const chartData = flags.map(flag => ({
     x: flag.ageDays,
     y: flag.priorityScore,
@@ -12,6 +16,7 @@ const PriorityScatterChart = ({ flags }) => {
   }));
 
   if (chartData.length === 0) {
+  // Show message if no data is available
     return (
       <Paper sx={{ p: 3, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography variant="h6" color="text.secondary">
@@ -22,6 +27,8 @@ const PriorityScatterChart = ({ flags }) => {
   }
 
   const CustomTooltip = ({ active, payload }) => {
+  // Custom tooltip for chart points
+  // Render scatter chart for flag analysis
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (

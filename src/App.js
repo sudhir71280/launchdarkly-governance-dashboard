@@ -1,3 +1,8 @@
+// ------------------------------
+// LaunchDarkly Governance Dashboard
+// Main App Component
+// ------------------------------
+
 import React, { useState, useEffect } from 'react';
 import {
   ThemeProvider,
@@ -40,6 +45,7 @@ import { LaunchDarklyService } from './services/LaunchDarklyService';
 
 import './App.css';
 
+// Theme configuration for Material-UI
 const theme = createTheme({
   palette: {
     mode: 'light',
@@ -52,6 +58,7 @@ const theme = createTheme({
   },
 });
 
+// TabPanel: Renders content for each tab
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div
@@ -67,6 +74,9 @@ function TabPanel({ children, value, index, ...other }) {
 }
 
 function App() {
+  // ------------------------------
+  // State Variables
+  // ------------------------------
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -83,16 +93,23 @@ function App() {
     lifecycleStages: ['Ready for Review', 'Ready to Archive'],
   });
 
+  // Snackbar for notifications
   const { enqueueSnackbar } = useSnackbar();
 
+  // Service instance for LaunchDarkly API
   const launchDarklyService = new LaunchDarklyService(config.apiToken, config.projectKey);
 
+  // ------------------------------
+  // Data Fetching & Effects
+  // ------------------------------
   useEffect(() => {
+    // Fetch data when API token or project key changes
     if (config.apiToken && config.projectKey) {
       loadData();
     }
   }, [config.apiToken, config.projectKey]);
 
+  // Fetches flag data and updates state
   const loadData = async () => {
     if (!config.apiToken || !config.projectKey) {
       enqueueSnackbar('Please configure API credentials', { variant: 'warning' });
@@ -118,6 +135,10 @@ function App() {
     }
   };
 
+  // ------------------------------
+  // Data Analysis & Metrics
+  // ------------------------------
+  // Analyze flags and calculate metrics, recommendations, and alerts
   const analyzeFlags = (flags) => {
     const currentTime = new Date();
     const analyzedFlags = [];
@@ -135,6 +156,7 @@ function App() {
       cleanupCandidates: [],
     };
 
+    // Analyze each flag for age, lifecycle, priority, etc.
     flags.forEach((flag) => {
       const creationDate = new Date(flag.creationDate);
       const ageDays = Math.floor((currentTime - creationDate) / (1000 * 60 * 60 * 24));
@@ -180,12 +202,13 @@ function App() {
     // Sort cleanup candidates by priority
     metrics.cleanupCandidates.sort((a, b) => b.priorityScore - a.priorityScore);
 
-    // Generate alerts
+    // Generate alerts based on metrics
     const alerts = generateAlerts(metrics);
 
     return { flags: analyzedFlags, metrics, alerts };
   };
 
+  // Determines the lifecycle stage of a flag
   const determineLifecycleStage = (flag, ageDays) => {
     if (flag.archived) return 'Archived';
     if (ageDays < 30) return 'Live';
@@ -194,6 +217,7 @@ function App() {
     return 'Permanent';
   };
 
+  // Calculates a priority score for flag cleanup
   const calculatePriorityScore = (flag, ageDays) => {
     let score = 1;
     
@@ -209,6 +233,7 @@ function App() {
     return Math.min(score, 10);
   };
 
+  // Generates alert messages based on metrics
   const generateAlerts = (metrics) => {
     const alerts = [];
     
@@ -240,6 +265,7 @@ function App() {
     return alerts;
   };
 
+  // Archives a flag and refreshes dashboard data
   const handleArchiveFlag = async (flagKey) => {
     try {
       setLoading(true);
@@ -253,6 +279,7 @@ function App() {
     }
   };
 
+  // Updates configuration and saves to localStorage
   const handleConfigChange = (newConfig) => {
     setConfig(newConfig);
     // Save to localStorage
@@ -260,6 +287,7 @@ function App() {
     localStorage.setItem('launchdarkly_project_key', newConfig.projectKey);
   };
 
+  // Exports cleanup candidates to CSV file
   const handleExportData = () => {
     const csvData = metrics.cleanupCandidates.map(flag => ({
       'Name': flag.name,
@@ -286,10 +314,10 @@ function App() {
     window.URL.revokeObjectURL(url);
   };
 
-  // Filter flags based on current filters
+  // Filters flags based on user-selected filters
   const filteredFlags = flagsData.filter(flag => {
     if (!config.includeArchived && flag.archived) return false;
-    if (flag.ageDays < config.ageFilter) return false;
+     if (flag.ageDays < config.ageFilter) return false;
     if (!config.flagTypes.includes(flag.kind)) return false;
     if (config.lifecycleStages.length && !config.lifecycleStages.includes(flag.lifecycleStage)) return false;
     return true;

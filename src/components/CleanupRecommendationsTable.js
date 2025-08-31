@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+// ---------------------------------------------
+// CleanupRecommendationsTable: Table of flags needing cleanup
+// ---------------------------------------------
 import {
   Paper,
   Typography,
@@ -26,12 +29,14 @@ import {
 } from '@mui/icons-material';
 
 const getPriorityColor = (score) => {
+// Returns color for priority score
   if (score >= 7) return 'error';
   if (score >= 4) return 'warning';
   return 'success';
 };
 
 const getLifecycleColor = (stage) => {
+// Returns color for lifecycle stage
   switch (stage) {
     case 'Ready to Archive': return 'error';
     case 'Ready for Review': return 'warning';
@@ -41,15 +46,18 @@ const getLifecycleColor = (stage) => {
 };
 
 const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
+  // State for pagination and archive dialog
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [archiveDialog, setArchiveDialog] = useState({ open: false, flag: null });
 
   const handleArchiveClick = (flag) => {
+  // Opens archive confirmation dialog
     setArchiveDialog({ open: true, flag });
   };
 
   const handleArchiveConfirm = () => {
+  // Archives selected flag
     if (archiveDialog.flag) {
       onArchive(archiveDialog.flag.key);
     }
@@ -57,15 +65,18 @@ const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
   };
 
   const handleChangePage = (event, newPage) => {
+  // Handles table page change
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
+  // Handles change in rows per page
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
   if (!flags || flags.length === 0) {
+  // Show message if no flags need cleanup
     return (
       <Paper sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom>
@@ -85,6 +96,8 @@ const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
   }
 
   const paginatedFlags = flags.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  // Paginate flags for table display
+  // Render table of flags needing cleanup
 
   return (
     <Paper sx={{ width: '100%' }}>

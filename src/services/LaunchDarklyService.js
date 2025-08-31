@@ -1,6 +1,10 @@
 import axios from 'axios';
+// ---------------------------------------------
+// LaunchDarklyService: Handles API interactions
+// ---------------------------------------------
 
 export class LaunchDarklyService {
+  // Constructor sets up API credentials and axios client
   constructor(apiToken, projectKey, baseUrl = 'https://app.launchdarkly.com/api/v2') {
     this.apiToken = apiToken;
     this.projectKey = projectKey;
@@ -17,6 +21,7 @@ export class LaunchDarklyService {
   }
 
   async fetchFlags() {
+  // Fetches all flags for the given project, paginated
     try {
       let allFlags = [];
       let offset = 0;
@@ -41,6 +46,7 @@ export class LaunchDarklyService {
   }
 
   async archiveFlag(flagKey) {
+  // Archives a flag by setting its 'archived' property to true
     try {
       const patchData = [
         {
@@ -59,6 +65,7 @@ export class LaunchDarklyService {
   }
 
   async getFlagDetails(flagKey) {
+  // Fetches details for a single flag
     try {
       const response = await this.client.get(`/flags/${this.projectKey}/${flagKey}`);
       return response.data;
@@ -69,6 +76,7 @@ export class LaunchDarklyService {
   }
 
   async bulkArchiveFlags(flagKeys) {
+  // Archives multiple flags in sequence and returns results
     const results = [];
     
     for (const flagKey of flagKeys) {

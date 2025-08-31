@@ -1,4 +1,7 @@
 import React from 'react';
+// ---------------------------------------------
+// MetricsCards: Displays summary cards for flag metrics
+// ---------------------------------------------
 import {
   Grid,
   Card,
@@ -15,6 +18,7 @@ import {
 } from '@mui/icons-material';
 
 const MetricCard = ({ title, value, icon, color = 'primary', progress }) => (
+// MetricCard: Single metric display with optional progress bar
   <Card sx={{ height: '100%', background: `linear-gradient(135deg, ${color === 'primary' ? '#667eea 0%, #764ba2 100%' : color === 'secondary' ? '#f093fb 0%, #f5576c 100%' : color === 'success' ? '#4facfe 0%, #00f2fe 100%' : '#43e97b 0%, #38f9d7 100%'})` }}>
     <CardContent sx={{ color: 'white', position: 'relative', overflow: 'hidden' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -52,12 +56,14 @@ const MetricCard = ({ title, value, icon, color = 'primary', progress }) => (
 );
 
 const MetricsCards = ({ metrics }) => {
+  // Calculate percentages for progress bars
   const totalActive = metrics.totalFlags - (metrics.archivedFlags || 0);
   const cleanupPercentage = totalActive > 0 ? ((metrics.readyToArchive || 0) / totalActive) * 100 : 0;
   const tempPercentage = totalActive > 0 ? ((metrics.temporaryFlags || 0) / totalActive) * 100 : 0;
   const highPriorityPercentage = totalActive > 0 ? ((metrics.highPriority || 0) / totalActive) * 100 : 0;
 
   return (
+  // Render grid of metric cards
     <Grid container spacing={3} sx={{ mb: 3 }}>
       <Grid item xs={12} sm={6} md={3}>
         <MetricCard

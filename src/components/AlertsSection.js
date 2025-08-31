@@ -1,4 +1,7 @@
 import React from 'react';
+// ---------------------------------------------
+// AlertsSection: Displays governance alerts and insights
+// ---------------------------------------------
 import {
   Paper,
   Typography,
@@ -17,6 +20,7 @@ import {
 } from '@mui/icons-material';
 
 const getAlertSeverity = (level) => {
+// Maps alert level to MUI severity
   switch (level) {
     case 'HIGH': return 'error';
     case 'MEDIUM': return 'warning';
@@ -26,6 +30,7 @@ const getAlertSeverity = (level) => {
 };
 
 const getAlertIcon = (level) => {
+// Maps alert level to icon
   switch (level) {
     case 'HIGH': return <Error />;
     case 'MEDIUM': return <Warning />;
@@ -35,6 +40,7 @@ const getAlertIcon = (level) => {
 };
 
 const AlertsSection = ({ alerts, metrics }) => {
+  // Calculate ratios and averages for insights
   const totalFlags = metrics.totalFlags || 0;
   const activeFlags = totalFlags - (metrics.archivedFlags || 0);
   const tempRatio = activeFlags > 0 ? ((metrics.temporaryFlags || 0) / activeFlags * 100) : 0;
@@ -44,6 +50,7 @@ const AlertsSection = ({ alerts, metrics }) => {
     : 0;
 
   return (
+  // Render alerts and governance insights
     <Box>
       <Typography variant="h6" gutterBottom>
         Governance Alerts

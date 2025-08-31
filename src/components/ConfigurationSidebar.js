@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+// ---------------------------------------------
+// ConfigurationSidebar: Sidebar for dashboard settings and filters
+// ---------------------------------------------
 import {
   Box,
   Typography,
@@ -23,10 +26,12 @@ import {
 } from '@mui/icons-material';
 
 const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
+  // Local state for form values and errors
   const [localConfig, setLocalConfig] = useState(config);
   const [errors, setErrors] = useState({});
 
   const handleSave = () => {
+  // Validate and save configuration
     const newErrors = {};
     
     if (!localConfig.apiToken.trim()) {
@@ -48,6 +53,7 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
   };
 
   const handleFlagTypeChange = (flagType) => {
+  // Toggle flag type filter
     const updatedTypes = localConfig.flagTypes.includes(flagType)
       ? localConfig.flagTypes.filter(type => type !== flagType)
       : [...localConfig.flagTypes, flagType];
@@ -59,6 +65,7 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
   };
 
   const handleLifecycleStageChange = (stage) => {
+  // Toggle lifecycle stage filter
     const updatedStages = localConfig.lifecycleStages.includes(stage)
       ? localConfig.lifecycleStages.filter(s => s !== stage)
       : [...localConfig.lifecycleStages, stage];
@@ -73,6 +80,7 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
   const lifecycleStageOptions = ['Live', 'Ready for Review', 'Ready to Archive', 'Permanent', 'Archived'];
 
   return (
+  // Render sidebar UI for configuration and filters
     <Box sx={{ width: 400, p: 3 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>

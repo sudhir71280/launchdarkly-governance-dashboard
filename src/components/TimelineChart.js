@@ -1,13 +1,18 @@
 import React from 'react';
+// ---------------------------------------------
+// TimelineChart: Shows flag creation over time
+// ---------------------------------------------
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Paper, Typography, Box } from '@mui/material';
 import { format, parseISO } from 'date-fns';
 
 const TimelineChart = ({ flags }) => {
+  // Group flags by creation month for timeline chart
   // Group flags by creation month
   const monthlyData = {};
   
   flags.forEach(flag => {
+  // Extract month from flag creation date
     const date = new Date(flag.creationDate);
     const monthKey = format(date, 'yyyy-MM');
     
@@ -25,7 +30,9 @@ const TimelineChart = ({ flags }) => {
     }));
 
   if (chartData.length === 0) {
+  // Show message if no data is available
     return (
+  // Render line chart of flag creation timeline
       <Paper sx={{ p: 3, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography variant="h6" color="text.secondary">
           No data available

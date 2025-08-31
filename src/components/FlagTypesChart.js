@@ -1,15 +1,21 @@
 import React from 'react';
+// ---------------------------------------------
+// FlagTypesChart: Shows distribution of flag types
+// ---------------------------------------------
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Paper, Typography, Box } from '@mui/material';
 
 const FlagTypesChart = ({ data }) => {
+  // Prepare chart data from flag types object
   const chartData = Object.entries(data || {}).map(([name, value]) => ({
     name,
     value,
   }));
 
   if (chartData.length === 0) {
+  // Show message if no data is available
     return (
+  // Render bar chart for flag types
       <Paper sx={{ p: 3, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography variant="h6" color="text.secondary">
           No data available
