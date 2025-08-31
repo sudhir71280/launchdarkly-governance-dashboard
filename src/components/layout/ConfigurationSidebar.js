@@ -6,6 +6,8 @@ import {
   Box,
   Typography,
   TextField,
+  Select,
+  MenuItem,
   FormControl,
   FormControlLabel,
   Switch,
@@ -19,6 +21,7 @@ import {
   Paper,
   Alert,
 } from '@mui/material';
+import { launchdarklyConfig } from '../../config/launchdarklyConfig';
 import {
   Close,
   Save,
@@ -98,29 +101,45 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
         <Typography variant="subtitle1" gutterBottom>
           LaunchDarkly API
         </Typography>
+        <FormControl fullWidth margin="normal" size="small" error={!!errors.apiToken}>
+          <Typography variant="body2" sx={{ mb: 1 }}>API Token</Typography>
+          <Select
+            value={localConfig.apiToken}
+            onChange={(e) => setLocalConfig({ ...localConfig, apiToken: e.target.value })}
+            displayEmpty
+          >
+            <MenuItem value=""><em>Select API Token</em></MenuItem>
+            {launchdarklyConfig.apiTokens.map(token => (
+              <MenuItem key={token.value} value={token.value}>{token.label}</MenuItem>
+            ))}
+          </Select>
+          {errors.apiToken && (
+            <Typography color="error" variant="caption">{errors.apiToken}</Typography>
+          )}
+          {!errors.apiToken && (
+            <Typography variant="caption">Choose your LaunchDarkly API token</Typography>
+          )}
+        </FormControl>
         
-        <TextField
-          fullWidth
-          label="API Token"
-          type="password"
-          value={localConfig.apiToken}
-          onChange={(e) => setLocalConfig({ ...localConfig, apiToken: e.target.value })}
-          error={!!errors.apiToken}
-          helperText={errors.apiToken || 'Your LaunchDarkly API token'}
-          margin="normal"
-          size="small"
-        />
-        
-        <TextField
-          fullWidth
-          label="Project Key"
-          value={localConfig.projectKey}
-          onChange={(e) => setLocalConfig({ ...localConfig, projectKey: e.target.value })}
-          error={!!errors.projectKey}
-          helperText={errors.projectKey || 'Your LaunchDarkly project key'}
-          margin="normal"
-          size="small"
-        />
+  <FormControl fullWidth margin="normal" size="small" error={!!errors.projectKey}>
+          <Typography variant="body2" sx={{ mb: 1 }}>Project Key</Typography>
+          <Select
+            value={localConfig.projectKey}
+            onChange={(e) => setLocalConfig({ ...localConfig, projectKey: e.target.value })}
+            displayEmpty
+          >
+            <MenuItem value=""><em>Select Project Key</em></MenuItem>
+            {launchdarklyConfig.projectKeys.map(project => (
+              <MenuItem key={project.value} value={project.value}>{project.label}</MenuItem>
+            ))}
+          </Select>
+          {errors.projectKey && (
+            <Typography color="error" variant="caption">{errors.projectKey}</Typography>
+          )}
+          {!errors.projectKey && (
+            <Typography variant="caption">Choose your LaunchDarkly project key</Typography>
+          )}
+        </FormControl>
       </Paper>
 
       {/* Filters */}

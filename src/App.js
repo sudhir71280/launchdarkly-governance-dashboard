@@ -4,46 +4,29 @@
 // ------------------------------
 
 import React, { useState, useEffect } from 'react';
-import {
-  ThemeProvider,
-  createTheme,
-  CssBaseline,
-  Box,
-  Container,
-  Grid,
-  Paper,
-  Typography,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Drawer,
-  Button,
-  Alert,
-  Tab,
-  Tabs,
-  CircularProgress,
-} from '@mui/material';
-import {
-  Flag,
-  Refresh,
-  Menu,
-  Download,
-} from '@mui/icons-material';
+import {  ThemeProvider,  createTheme,  CssBaseline,  Box,  Container,  Grid,  Paper,  Typography,  AppBar, Toolbar,  IconButton,  Drawer,  Button,  Alert,  Tab,  Tabs,  CircularProgress,} from '@mui/material';
+import {  Flag,  Refresh,  Menu,  Download,} from '@mui/icons-material';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 
 // Import custom components
 import MetricsCards from './components/MetricsCards';
-import FlagLifecycleChart from './components/FlagLifecycleChart';
-import AgeDistributionChart from './components/AgeDistributionChart';
-import PriorityScatterChart from './components/PriorityScatterChart';
-import TimelineChart from './components/TimelineChart';
-import FlagTypesChart from './components/FlagTypesChart';
-import CleanupRecommendationsTable from './components/CleanupRecommendationsTable';
+import FlagLifecycleChart from './components/charts/FlagLifecycleChart';
+import AgeDistributionChart from './components/charts/AgeDistributionChart';
+import PriorityScatterChart from './components/charts/PriorityScatterChart';
+import TimelineChart from './components/charts/TimelineChart';
+import FlagTypesChart from './components/charts/FlagTypesChart';
+// import CleanupRecommendationsTable from './components/CleanupRecommendationsTable';
+import CleanupRecommendationsTable from './components/tables/CleanupRecommendationsTable';
 import AlertsSection from './components/AlertsSection';
-import ConfigurationSidebar from './components/ConfigurationSidebar';
+// import ConfigurationSidebar from './components/ConfigurationSidebar';
+import ConfigurationSidebar from './components/layout/ConfigurationSidebar';
 import { LaunchDarklyService } from './services/LaunchDarklyService';
 
-import './App.css';
+import './styles/App.css';
+import {
+  analyzeFlags,
+  exportCleanupCandidatesToCSV
+} from './utils/flagUtils';
 
 // Theme configuration for Material-UI
 const theme = createTheme({
@@ -135,135 +118,7 @@ function App() {
     }
   };
 
-  // ------------------------------
-  // Data Analysis & Metrics
-  // ------------------------------
-  // Analyze flags and calculate metrics, recommendations, and alerts
-  const analyzeFlags = (flags) => {
-    const currentTime = new Date();
-    const analyzedFlags = [];
-    
-    const metrics = {
-      totalFlags: flags.length,
-      temporaryFlags: 0,
-      permanentFlags: 0,
-      archivedFlags: 0,
-      readyToArchive: 0,
-      highPriority: 0,
-      ageDistribution: { '0-30': 0, '31-90': 0, '91-180': 0, '180+': 0 },
-      flagTypes: {},
-      lifecycleStages: {},
-      cleanupCandidates: [],
-    };
 
-    // Analyze each flag for age, lifecycle, priority, etc.
-    flags.forEach((flag) => {
-      const creationDate = new Date(flag.creationDate);
-      const ageDays = Math.floor((currentTime - creationDate) / (1000 * 60 * 60 * 24));
-      const lifecycleStage = determineLifecycleStage(flag, ageDays);
-      const priorityScore = calculatePriorityScore(flag, ageDays);
-      const analyzedFlag = {
-        ...flag,
-        ageDays,
-        creationDate,
-        lifecycleStage,
-        priorityScore,
-      };
-      analyzedFlags.push(analyzedFlag);
-
-      // Metrics
-      if (flag.archived) {
-        metrics.archivedFlags++;
-      } else {
-        if (flag.temporary) metrics.temporaryFlags++;
-        else metrics.permanentFlags++;
-
-        // Age distribution
-        if (ageDays <= 30) metrics.ageDistribution['0-30']++;
-        else if (ageDays <= 90) metrics.ageDistribution['31-90']++;
-        else if (ageDays <= 180) metrics.ageDistribution['91-180']++;
-        else metrics.ageDistribution['180+']++;
-
-        // Flag types
-        metrics.flagTypes[flag.kind] = (metrics.flagTypes[flag.kind] || 0) + 1;
-
-        // Lifecycle stages
-        metrics.lifecycleStages[lifecycleStage] = (metrics.lifecycleStages[lifecycleStage] || 0) + 1;
-
-        // Cleanup candidates
-        if (lifecycleStage === 'Ready to Archive' || priorityScore >= 7) {
-          if (lifecycleStage === 'Ready to Archive') metrics.readyToArchive++;
-          if (priorityScore >= 7) metrics.highPriority++;
-          metrics.cleanupCandidates.push(analyzedFlag);
-        }
-      }
-    });
-
-    // Sort cleanup candidates by priority
-    metrics.cleanupCandidates.sort((a, b) => b.priorityScore - a.priorityScore);
-
-    // Generate alerts based on metrics
-    const alerts = generateAlerts(metrics);
-
-    return { flags: analyzedFlags, metrics, alerts };
-  };
-
-  // Determines the lifecycle stage of a flag
-  const determineLifecycleStage = (flag, ageDays) => {
-    if (flag.archived) return 'Archived';
-    if (ageDays < 30) return 'Live';
-    if (ageDays >= 30 && flag.temporary) return 'Ready for Review';
-    if (ageDays >= 90 && flag.temporary) return 'Ready to Archive';
-    return 'Permanent';
-  };
-
-  // Calculates a priority score for flag cleanup
-  const calculatePriorityScore = (flag, ageDays) => {
-    let score = 1;
-    
-    if (ageDays > 180) score += 4;
-    else if (ageDays > 90) score += 3;
-    else if (ageDays > 30) score += 2;
-    
-    if (flag.temporary) score += 2;
-    
-    const envCount = Object.keys(flag.environments || {}).length;
-    if (envCount <= 2) score += 2;
-    
-    return Math.min(score, 10);
-  };
-
-  // Generates alert messages based on metrics
-  const generateAlerts = (metrics) => {
-    const alerts = [];
-    
-    if (metrics.highPriority > 10) {
-      alerts.push({
-        level: 'HIGH',
-        message: `${metrics.highPriority} flags require immediate attention`,
-        type: 'cleanup',
-      });
-    }
-    
-    if (metrics.readyToArchive > 20) {
-      alerts.push({
-        level: 'MEDIUM',
-        message: `${metrics.readyToArchive} flags are ready to archive`,
-        type: 'cleanup',
-      });
-    }
-    
-    const activeFlags = metrics.totalFlags - metrics.archivedFlags;
-    if (activeFlags > 500) {
-      alerts.push({
-        level: 'MEDIUM',
-        message: `${activeFlags} active flags may impact performance`,
-        type: 'performance',
-      });
-    }
-    
-    return alerts;
-  };
 
   // Archives a flag and refreshes dashboard data
   const handleArchiveFlag = async (flagKey) => {
@@ -289,29 +144,15 @@ function App() {
 
   // Exports cleanup candidates to CSV file
   const handleExportData = () => {
-    const csvData = metrics.cleanupCandidates.map(flag => ({
-      'Name': flag.name,
-      'Maintainer': `${flag._maintainer?.firstName || ''} ${flag._maintainer?.lastName || ''}`,
-      'Tags': flag.tags?.join('|') || 'No tags',
-      'Age (days)': flag.ageDays,
-      'Lifecycle Stage': flag.lifecycleStage,
-      'Priority Score': flag.priorityScore,
-      'Temporary': flag.temporary,
-    }));
-
-    // Create CSV content
-    const headers = Object.keys(csvData[0] || {}).join(',');
-    const rows = csvData.map(row => Object.values(row).join(','));
-    const csvContent = [headers, ...rows].join('\n');
-
-    // Download CSV
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `flag_cleanup_report_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    window.URL.revokeObjectURL(url);
+  const csvContent = exportCleanupCandidatesToCSV(metrics.cleanupCandidates || []);
+  // Download CSV
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `flag_cleanup_report_${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+  window.URL.revokeObjectURL(url);
   };
 
   // Filters flags based on user-selected filters

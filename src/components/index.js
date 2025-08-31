@@ -5,6 +5,6 @@ export { default as AgeDistributionChart } from './AgeDistributionChart';
 export { default as FlagTypesChart } from './FlagTypesChart';
 export { default as PriorityScatterChart } from './PriorityScatterChart';
 export { default as TimelineChart } from './TimelineChart';
-export { default as CleanupRecommendationsTable } from './CleanupRecommendationsTable';
+export { default as CleanupRecommendationsTable } from './tables/CleanupRecommendationsTable';
 export { default as AlertsSection } from './AlertsSection';
-export { default as ConfigurationSidebar } from './ConfigurationSidebar';
+export { default as ConfigurationSidebar } from './layout/ConfigurationSidebar';
