@@ -22,11 +22,22 @@ import {
   IconButton,
   Tooltip,
   Box,
+  Avatar,
 } from '@mui/material';
-import {
-  Archive,
-  CheckCircle,
-} from '@mui/icons-material';
+import { Archive, CheckCircle } from '@mui/icons-material';
+// Helper to generate a color from a string
+function stringToColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xff;
+    color += ('00' + value.toString(16)).slice(-2);
+  }
+  return color;
+}
 
 const getPriorityColor = (score) => {
 // Returns color for priority score
@@ -101,7 +112,7 @@ const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
 
   return (
     <Paper sx={{ width: '100%' }}>
-      <Box sx={{ p: 3, pb: 0 }}>
+      <Box sx={{ p: 2, pb: 0 }}>
         <Typography variant="h6" gutterBottom>
           Cleanup Recommendations
         </Typography>
@@ -114,7 +125,6 @@ const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
-              <TableCell>Maintainer</TableCell>
               <TableCell>Tag</TableCell>
               <TableCell align="center">Age (days)</TableCell>
               <TableCell align="center">Lifecycle Stage</TableCell>
@@ -128,19 +138,45 @@ const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
               return (
                 <TableRow key={flag.key} hover>
                   <TableCell>
-                    <Typography variant="body2">
-                      {flag.name || 'No name'}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      {flag._maintainer?.firstName && flag._maintainer?.lastName ? (
+                        <Tooltip title={`${flag._maintainer.firstName} ${flag._maintainer.lastName}`} arrow>
+                          <Avatar
+                            sx={{ width: 28, height: 28, fontSize: 14, bgcolor: stringToColor(flag._maintainer.firstName + flag._maintainer.lastName) }}
+                          >
+                            {flag._maintainer.firstName[0]}{flag._maintainer.lastName[0]}
+                          </Avatar>
+                        </Tooltip>
+                      ) : (
+                          <Avatar sx={{ width: 28, height: 28, fontSize: 14, bgcolor: '#b71c1c' }}>??</Avatar>
+                      )}
+                      <Typography variant="body2">{flag.name || 'No name'}</Typography>
+                    </Box>
                   </TableCell>
-                   <TableCell>
-                    <Typography variant="body2">
-                      {flag._maintainer?.firstName || ''} {flag._maintainer?.lastName || ''}
-                    </Typography>
-                  </TableCell>
-                   <TableCell>
-                    <Typography variant="body2">
-                      {flag.tags?.join(', ') || 'No tags'}
-                    </Typography>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      {Array.isArray(flag.tags) && flag.tags.length > 0 ? (
+                        flag.tags.length === 1 ? (
+                          <Chip
+                            key={flag.tags[0]}
+                            label={flag.tags[0]}
+                            size="small"
+                            sx={{ bgcolor: stringToColor(flag.tags[0]), color: '#222', fontWeight: 700 }}
+                          />
+                        ) : (
+                          <Tooltip title={flag.tags.slice(1).join(', ')} arrow>
+                            <Chip
+                              key={flag.tags[0]}
+                              label={flag.tags[0] + ' +' + (flag.tags.length - 1)}
+                              size="small"
+                              sx={{ bgcolor: stringToColor(flag.tags[0]), color: '#222', fontWeight: 700, cursor: 'pointer' }}
+                            />
+                          </Tooltip>
+                        )
+                      ) : (
+                        <Chip label="No tags" size="small" sx={{ bgcolor: '#bdbdbd', color: '#222', fontWeight: 700 }} />
+                      )}
+                    </Box>
                   </TableCell>
                   <TableCell align="center">
                     <Typography variant="body2">
@@ -148,11 +184,22 @@ const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    <Chip
-                      label={flag.lifecycleStage}
-                      color={getLifecycleColor(flag.lifecycleStage)}
-                      size="small"
-                    />
+                    {Array.isArray(flag.lifecycleStage) ? (
+                      flag.lifecycleStage.length === 1 ? (
+                        <Chip label={flag.lifecycleStage[0]} color={getLifecycleColor(flag.lifecycleStage[0])} size="small" sx={{ color: '#fff', fontWeight: 700 }} />
+                      ) : (
+                        <Tooltip title={flag.lifecycleStage.slice(1).join(', ')} arrow>
+                          <Chip
+                            label={flag.lifecycleStage[0] + ' +' + (flag.lifecycleStage.length - 1)}
+                            color={getLifecycleColor(flag.lifecycleStage[0])}
+                            size="small"
+                            sx={{ color: '#fff', fontWeight: 700, cursor: 'pointer' }}
+                          />
+                        </Tooltip>
+                      )
+                    ) : (
+                      <Chip label={flag.lifecycleStage} color={getLifecycleColor(flag.lifecycleStage)} size="small" sx={{ color: '#fff', fontWeight: 700 }} />
+                    )}
                   </TableCell>
                   <TableCell align="center">
                     <Chip

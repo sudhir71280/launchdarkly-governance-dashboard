@@ -1,22 +1,25 @@
+
+
+
+
 import React from 'react';
-// ---------------------------------------------
-// PriorityScatterChart: Shows flag age vs. cleanup priority
-// ---------------------------------------------
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Paper, Typography, Box } from '@mui/material';
 
-const PriorityScatterChart = ({ flags }) => {
-  // Prepare chart data from flags
-  const chartData = flags.map(flag => ({
-    x: flag.ageDays,
-    y: flag.priorityScore,
-    name: flag.key,
-    lifecycle: flag.lifecycleStage,
-    temporary: flag.temporary,
-  }));
+// Line chart for flag analysis
+const PriorityLineChart = ({ flags }) => {
+  // Prepare chart data: each flag is a point
+  const chartData = flags
+    .map(flag => ({
+      x: flag.ageDays,
+      y: flag.priorityScore,
+      name: flag.key,
+      lifecycle: flag.lifecycleStage,
+      temporary: flag.temporary,
+    }))
+    .sort((a, b) => a.x - b.x); // Sort by age for line chart
 
   if (chartData.length === 0) {
-  // Show message if no data is available
     return (
       <Paper sx={{ p: 3, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography variant="h6" color="text.secondary">
@@ -27,18 +30,10 @@ const PriorityScatterChart = ({ flags }) => {
   }
 
   const CustomTooltip = ({ active, payload }) => {
-  // Custom tooltip for chart points
-  // Render scatter chart for flag analysis
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <Box sx={{ 
-          backgroundColor: 'white', 
-          p: 2, 
-          border: '1px solid #ccc', 
-          borderRadius: 1,
-          boxShadow: 2 
-        }}>
+        <Box sx={{ backgroundColor: 'white', p: 2, border: '1px solid #ccc', borderRadius: 1, boxShadow: 2 }}>
           <Typography variant="subtitle2">{data.name}</Typography>
           <Typography variant="body2">Age: {data.x} days</Typography>
           <Typography variant="body2">Priority: {data.y}/10</Typography>
@@ -51,38 +46,30 @@ const PriorityScatterChart = ({ flags }) => {
   };
 
   return (
-    <Paper sx={{ p: 3, height: 500 }}>
+  <Paper sx={{ p: 3, height: 320 }}>
       <Typography variant="h6" gutterBottom>
         Cleanup Priority vs Flag Age
       </Typography>
-      <Box sx={{ height: 400 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              type="number" 
-              dataKey="x" 
-              name="Age (days)" 
-              label={{ value: 'Age (days)', position: 'insideBottom', offset: -10 }}
+      <Box sx={{ height: 350, pb: 1 }}>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={chartData} margin={{ bottom: 40 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+            <XAxis
+              type="number"
+              dataKey="x"
+              name="Age (days)"
+              label={{ value: 'Age (days)', position: 'bottom', offset: 10, fontSize: 16 }}
+              allowDataOverflow={true}
+              padding={{ left: 20, right: 20 }}
             />
-            <YAxis 
-              type="number" 
-              dataKey="y" 
-              name="Priority Score" 
-              domain={[0, 10]}
-              label={{ value: 'Priority Score', angle: -90, position: 'insideLeft' }}
-            />
+            <YAxis type="number" dataKey="y" name="Priority Score" domain={[0, 10]} label={{ value: 'Priority Score', angle: -90, position: 'insideLeft' }} />
             <Tooltip content={<CustomTooltip />} />
-            <Scatter 
-              dataKey="y" 
-              fill="#8884d8"
-              fillOpacity={0.6}
-            />
-          </ScatterChart>
+            <Line type="monotone" dataKey="y" stroke="#1976d2" strokeWidth={3} dot={{ r: 5 }} activeDot={{ r: 7 }} />
+          </LineChart>
         </ResponsiveContainer>
       </Box>
     </Paper>
   );
 };
 
-export default PriorityScatterChart;
+export default PriorityLineChart;

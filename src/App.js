@@ -12,7 +12,8 @@ import { SnackbarProvider, useSnackbar } from 'notistack';
 import MetricsCards from './components/MetricsCards';
 import FlagLifecycleChart from './components/charts/FlagLifecycleChart';
 import AgeDistributionChart from './components/charts/AgeDistributionChart';
-import PriorityScatterChart from './components/charts/PriorityScatterChart';
+import PriorityBubbleChart from './components/charts/PriorityScatterChart';
+import InteractiveAnalysisTable from './components/tables/InteractiveAnalysisTable';
 import TimelineChart from './components/charts/TimelineChart';
 import FlagTypesChart from './components/charts/FlagTypesChart';
 // import CleanupRecommendationsTable from './components/CleanupRecommendationsTable';
@@ -257,7 +258,7 @@ function App() {
 
                 {/* Overview Tab */}
                 <TabPanel value={tabValue} index={0}>
-                  <Grid container spacing={3}>
+                  <Grid container spacing={1}>
                     <Grid item xs={12} md={6}>
                       <FlagLifecycleChart data={metrics.lifecycleStages} />
                     </Grid>
@@ -276,8 +277,11 @@ function App() {
                 {/* Analysis Tab */}
                 <TabPanel value={tabValue} index={1}>
                   <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                      <PriorityScatterChart flags={filteredFlags} />
+                    <Grid item xs={12} md={12}>
+                      <PriorityBubbleChart flags={filteredFlags} />
+                    </Grid>
+                    <Grid item xs={12} md={12}>
+                      <InteractiveAnalysisTable flags={filteredFlags} />
                     </Grid>
                   </Grid>
                 </TabPanel>
