@@ -101,6 +101,8 @@ const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
+              <TableCell>Maintainer</TableCell>
+              <TableCell>Tag</TableCell>
               <TableCell align="center">Age (days)</TableCell>
               <TableCell align="center">Lifecycle Stage</TableCell>
               <TableCell align="center">Priority</TableCell>
@@ -115,6 +117,16 @@ const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
                   <TableCell>
                     <Typography variant="body2">
                       {flag.name || 'No name'}
+                    </Typography>
+                  </TableCell>
+                   <TableCell>
+                    <Typography variant="body2">
+                      {flag._maintainer?.firstName || ''} {flag._maintainer?.lastName || ''}
+                    </Typography>
+                  </TableCell>
+                   <TableCell>
+                    <Typography variant="body2">
+                      {flag.tags?.join(', ') || 'No tags'}
                     </Typography>
                   </TableCell>
                   <TableCell align="center">

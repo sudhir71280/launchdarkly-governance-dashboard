@@ -262,8 +262,9 @@ function App() {
 
   const handleExportData = () => {
     const csvData = metrics.cleanupCandidates.map(flag => ({
-      'Flag Key': flag.key,
       'Name': flag.name,
+      'Maintainer': `${flag._maintainer?.firstName || ''} ${flag._maintainer?.lastName || ''}`,
+      'Tags': flag.tags?.join('|') || 'No tags',
       'Age (days)': flag.ageDays,
       'Lifecycle Stage': flag.lifecycleStage,
       'Priority Score': flag.priorityScore,
