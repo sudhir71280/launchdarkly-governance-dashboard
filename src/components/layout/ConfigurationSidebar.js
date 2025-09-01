@@ -15,9 +15,26 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
     environment: config.environment ?? '',
     apiToken: config.apiToken || 'api-8a9c5d7c-2557-46a4-bb8c-5732643a2f4c',
   });
-  const [errors, setErrors] = useState({});
-  const [projectOptions, setProjectOptions] = useState(launchdarklyConfig.projectKeys || []);
   const [environmentOptions, setEnvironmentOptions] = useState(launchdarklyConfig.environments || []);
+  const [errors, setErrors] = useState(() => {
+    return (!config.environment || String(config.environment).trim() === '')
+      ? { environment: 'Environment is required' }
+      : {};
+  });
+
+  // Always validate environment on change and when environment options update
+  useEffect(() => {
+    if (!localConfig.environment || String(localConfig.environment).trim() === '') {
+      setErrors(prev => ({ ...prev, environment: 'Environment is required' }));
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.environment;
+        return newErrors;
+      });
+    }
+  }, [localConfig.environment, environmentOptions]);
+  const [projectOptions, setProjectOptions] = useState(launchdarklyConfig.projectKeys || []);
   // Fetch projects from LaunchDarkly API when sidebar mounts or apiToken changes
   useEffect(() => {
     const fetchProjects = async () => {
@@ -56,6 +73,8 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
       return;
     }
 
+    // Clear errors on successful save
+    setErrors({});
     onConfigChange(localConfig);
     onClose();
   };
@@ -168,10 +187,20 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
         <FormControl fullWidth margin="normal" size="small" error={!!errors.environment}>
           <Typography variant="body2" sx={{ mb: 1 }}>Environment</Typography>
           <Select
-            value={localConfig.environment}
-            onChange={(e) => setLocalConfig({ ...localConfig, environment: e.target.value })}
+            value={localConfig.environment || ''}
+            onChange={(e) => {
+              const value = e.target.value;
+              setLocalConfig({ ...localConfig, environment: value });
+              // Validation is handled by useEffect above
+            }}
             displayEmpty
-            renderValue={selected => selected ? environmentOptions.find(env => env.value === selected)?.label : <em>Select Environment</em>}
+            renderValue={selected => {
+              if (!selected || !environmentOptions.length) {
+                return <em>Select Environment</em>;
+              }
+              const found = environmentOptions.find(env => env.value === selected);
+              return found ? found.label : <em>Select Environment</em>;
+            }}
           >
             <MenuItem value=""><em>Select Environment</em></MenuItem>
             {environmentOptions.map(env => (
@@ -271,7 +300,19 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
 
       {/* Actions */}
       <Box sx={{ display: 'flex', gap: 2 }}>
-        <Button variant="contained" onClick={handleSave} startIcon={<Save />} fullWidth>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          startIcon={<Save />}
+          fullWidth
+          disabled={
+            !localConfig.environment ||
+            String(localConfig.environment).trim() === '' ||
+            localConfig.environment === '' ||
+            localConfig.environment === undefined ||
+            !environmentOptions.some(env => env.value === localConfig.environment)
+          }
+        >
           Save Configuration
         </Button>
       </Box>
