@@ -12,19 +12,12 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  Button,
   Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  IconButton,
   Tooltip,
   Box,
   Avatar,
 } from '@mui/material';
-import { Archive, CheckCircle } from '@mui/icons-material';
+import { CheckCircle } from '@mui/icons-material';
 // Helper to generate a color from a string
 function stringToColor(str) {
   let hash = 0;
@@ -56,24 +49,10 @@ const getLifecycleColor = (stage) => {
   }
 };
 
-const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
-  // State for pagination and archive dialog
+const CleanupRecommendationsTable = ({ flags, loading }) => {
+  // State for pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [archiveDialog, setArchiveDialog] = useState({ open: false, flag: null });
-
-  const handleArchiveClick = (flag) => {
-  // Opens archive confirmation dialog
-    setArchiveDialog({ open: true, flag });
-  };
-
-  const handleArchiveConfirm = () => {
-  // Archives selected flag
-    if (archiveDialog.flag) {
-      onArchive(archiveDialog.flag.key);
-    }
-    setArchiveDialog({ open: false, flag: null });
-  };
 
   const handleChangePage = (event, newPage) => {
   // Handles table page change
@@ -124,13 +103,13 @@ const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
+              <TableCell>Owner</TableCell>
+              <TableCell>Flag Name</TableCell>
               <TableCell>Tag</TableCell>
               <TableCell align="center">Age (days)</TableCell>
               <TableCell align="center">Lifecycle Stage</TableCell>
               <TableCell align="center">Priority</TableCell>
               <TableCell align="center">Temporary</TableCell>
-              <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -150,6 +129,10 @@ const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
                       ) : (
                           <Avatar sx={{ width: 28, height: 28, fontSize: 14, bgcolor: '#b71c1c' }}>??</Avatar>
                       )}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Typography variant="body2">{flag.name || 'No name'}</Typography>
                     </Box>
                   </TableCell>
@@ -217,16 +200,7 @@ const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
                     />
                   </TableCell>
                   <TableCell align="center">
-                    <Tooltip title="Archive flag">
-                      <IconButton
-                        color="error"
-                        onClick={() => handleArchiveClick(flag)}
-                        disabled={loading}
-                        size="small"
-                      >
-                        <Archive />
-                      </IconButton>
-                    </Tooltip>
+                    {/* Archive action removed */}
                   </TableCell>
                 </TableRow>
               );
@@ -243,32 +217,7 @@ const CleanupRecommendationsTable = ({ flags, onArchive, loading }) => {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-      {/* Archive Confirmation Dialog */}
-      <Dialog
-        open={archiveDialog.open}
-        onClose={() => setArchiveDialog({ open: false, flag: null })}
-      >
-        <DialogTitle>Archive Flag</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to archive the flag "{archiveDialog.flag?.key}"?
-            This action cannot be undone from this interface.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setArchiveDialog({ open: false, flag: null })}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleArchiveConfirm} 
-            color="error" 
-            variant="contained"
-            disabled={loading}
-          >
-            Archive
-          </Button>
-        </DialogActions>
-      </Dialog>
+  {/* No archive dialog */}
     </Paper>
   );
 };

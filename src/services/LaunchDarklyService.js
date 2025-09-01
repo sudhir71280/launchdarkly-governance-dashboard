@@ -45,25 +45,6 @@ export class LaunchDarklyService {
     }
   }
 
-  async archiveFlag(flagKey) {
-  // Archives a flag by setting its 'archived' property to true
-    try {
-      const patchData = [
-        {
-          op: 'replace',
-          path: '/archived',
-          value: true,
-        },
-      ];
-
-      const response = await this.client.patch(`/flags/${this.projectKey}/${flagKey}`, patchData);
-      return response.data;
-    } catch (error) {
-      // Remove console.error to avoid warnings in console
-      throw new Error(`Failed to archive flag: ${error.response?.data?.message || error.message}`);
-    }
-  }
-
   async getFlagDetails(flagKey) {
   // Fetches details for a single flag
     try {
@@ -73,23 +54,6 @@ export class LaunchDarklyService {
       // Remove console.error to avoid warnings in console
       throw new Error(`Failed to get flag details: ${error.response?.data?.message || error.message}`);
     }
-  }
-
-  async bulkArchiveFlags(flagKeys) {
-  // Archives multiple flags in sequence and returns results
-    const results = [];
-    
-    for (const flagKey of flagKeys) {
-      try {
-        await this.archiveFlag(flagKey);
-        results.push({ flagKey, success: true });
-      } catch (error) {
-        // Do not log error to console, just record in results
-        results.push({ flagKey, success: false, error: error.message });
-      }
-    }
-    
-    return results;
   }
 }
 
