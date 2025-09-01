@@ -55,6 +55,16 @@ export class LaunchDarklyService {
       throw new Error(`Failed to get flag details: ${error.response?.data?.message || error.message}`);
     }
   }
+
+    async fetchProjects() {
+      // Fetches up to 200 projects from LaunchDarkly
+      try {
+        const response = await this.client.get('/projects?limit=200');
+        return response.data.items || [];
+      } catch (error) {
+        throw new Error(`Failed to fetch projects: ${error.response?.data?.message || error.message}`);
+      }
+    }
 }
 
 export default LaunchDarklyService;

@@ -2,6 +2,7 @@
 import React from 'react';
 
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel, Typography, Box, Chip, Tooltip, Avatar } from '@mui/material';
+import FlagDetailDialog from '../FlagDetailDialog';
 
 // Helper to generate a color from a string
 function stringToColor(str) {
@@ -83,6 +84,8 @@ const columns = [
 const InteractiveAnalysisTable = ({ flags }) => {
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('priorityScore');
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [selectedFlag, setSelectedFlag] = React.useState(null);
 
   if (!flags || flags.length === 0) {
     return (
@@ -99,111 +102,119 @@ const InteractiveAnalysisTable = ({ flags }) => {
   };
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>Flag Analysis Table</Typography>
-      <Box sx={{ maxHeight: 500, overflow: 'auto' }}>
-        <TableContainer>
-          <Table stickyHeader size="small">
-            <TableHead>
-              <TableRow>
-                {columns.map(col => (
-                  <TableCell key={col.id} align={col.numeric ? 'right' : 'left'}>
-                    <TableSortLabel
-                      active={orderBy === col.id}
-                      direction={orderBy === col.id ? order : 'asc'}
-                      onClick={() => handleSort(col.id)}
-                    >
-                      {col.label}
-                    </TableSortLabel>
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {stableSort(flags, getComparator(order, orderBy)).map(flag => (
-                <TableRow key={flag.key} hover>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {flag._maintainer?.firstName && flag._maintainer?.lastName ? (
-                        <Tooltip title={`${flag._maintainer.firstName} ${flag._maintainer.lastName}`} arrow>
-                          <Avatar
-                            sx={{ width: 28, height: 28, fontSize: 14, bgcolor: stringToColor(flag._maintainer.firstName + flag._maintainer.lastName) }}
-                          >
-                            {flag._maintainer.firstName[0]}{flag._maintainer.lastName[0]}
-                          </Avatar>
-                        </Tooltip>
-                      ) : (
-                        <Avatar sx={{ width: 28, height: 28, fontSize: 14, bgcolor: '#b71c1c' }}>??</Avatar>
-                      )}
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Tooltip title={`Key: ${flag.key}`} arrow>
-                        <Typography variant="body2">{flag.name || 'No name'}</Typography>
-                      </Tooltip>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {Array.isArray(flag.tags) && flag.tags.length > 0 ? (
-                        flag.tags.length === 1 ? (
-                          <Chip
-                            key={flag.tags[0]}
-                            label={flag.tags[0]}
-                            size="small"
-                            sx={{ bgcolor: stringToColor(flag.tags[0]), color: '#222', fontWeight: 700 }}
-                          />
+    <>
+      <Paper sx={{ p: 3 }}>
+        <Typography variant="h6" gutterBottom>Flag Analysis Table</Typography>
+        <Box sx={{ maxHeight: 500, overflow: 'auto' }}>
+          <TableContainer>
+            <Table stickyHeader size="small">
+              <TableHead>
+                <TableRow>
+                  {columns.map(col => (
+                    <TableCell key={col.id} align={col.numeric ? 'right' : 'left'}>
+                      <TableSortLabel
+                        active={orderBy === col.id}
+                        direction={orderBy === col.id ? order : 'asc'}
+                        onClick={() => handleSort(col.id)}
+                      >
+                        {col.label}
+                      </TableSortLabel>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {stableSort(flags, getComparator(order, orderBy)).map(flag => (
+                  <TableRow key={flag.key} hover>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {flag._maintainer?.firstName && flag._maintainer?.lastName ? (
+                          <Tooltip title={`${flag._maintainer.firstName} ${flag._maintainer.lastName}`} arrow>
+                            <Avatar
+                              sx={{ width: 28, height: 28, fontSize: 14, bgcolor: stringToColor(flag._maintainer.firstName + flag._maintainer.lastName) }}
+                            >
+                              {flag._maintainer.firstName[0]}{flag._maintainer.lastName[0]}
+                            </Avatar>
+                          </Tooltip>
                         ) : (
-                          <Tooltip title={flag.tags.slice(1).join(', ')} arrow>
+                          <Avatar sx={{ width: 28, height: 28, fontSize: 14, bgcolor: '#b71c1c' }}>??</Avatar>
+                        )}
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Tooltip title={`Key: ${flag.key}`} arrow>
+                          <Typography
+                            variant="body2"
+                            sx={{ cursor: 'pointer', textDecoration: 'underline' }}
+                            onClick={() => { setSelectedFlag(flag); setDialogOpen(true); }}
+                          >
+                            {flag.name || 'No name'}
+                          </Typography>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {Array.isArray(flag.tags) && flag.tags.length > 0 ? (
+                          flag.tags.length === 1 ? (
                             <Chip
                               key={flag.tags[0]}
-                              label={flag.tags[0] + ' +' + (flag.tags.length - 1)}
+                              label={flag.tags[0]}
                               size="small"
-                              sx={{ bgcolor: stringToColor(flag.tags[0]), color: '#222', fontWeight: 700, cursor: 'pointer' }}
+                              sx={{ bgcolor: stringToColor(flag.tags[0]), color: '#222', fontWeight: 700 }}
+                            />
+                          ) : (
+                            <Tooltip title={flag.tags.slice(1).join(', ')} arrow>
+                              <Chip
+                                key={flag.tags[0]}
+                                label={flag.tags[0] + ' +' + (flag.tags.length - 1)}
+                                size="small"
+                                sx={{ bgcolor: stringToColor(flag.tags[0]), color: '#222', fontWeight: 700, cursor: 'pointer' }}
+                              />
+                            </Tooltip>
+                          )
+                        ) : (
+                          <Chip label="No tags" size="small" sx={{ bgcolor: '#bdbdbd', color: '#222', fontWeight: 700 }} />
+                        )}
+                      </Box>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body2">{flag.ageDays}</Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      {Array.isArray(flag.lifecycleStage) ? (
+                        flag.lifecycleStage.length === 1 ? (
+                          <Chip label={flag.lifecycleStage[0]} color={getLifecycleColor(flag.lifecycleStage[0])} size="small" sx={{ color: '#222', fontWeight: 700 }} />
+                        ) : (
+                          <Tooltip title={flag.lifecycleStage.slice(1).join(', ')} arrow>
+                            <Chip
+                              label={flag.lifecycleStage[0] + ' +' + (flag.lifecycleStage.length - 1)}
+                              color={getLifecycleColor(flag.lifecycleStage[0])}
+                              size="small"
+                              sx={{ color: '#222', fontWeight: 700, cursor: 'pointer' }}
                             />
                           </Tooltip>
                         )
                       ) : (
-                        <Chip label="No tags" size="small" sx={{ bgcolor: '#bdbdbd', color: '#222', fontWeight: 700 }} />
+                        <Chip label={flag.lifecycleStage} color={getLifecycleColor(flag.lifecycleStage)} size="small" sx={{ color: '#222', fontWeight: 700 }} />
                       )}
-                    </Box>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography variant="body2">{flag.ageDays}</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    {Array.isArray(flag.lifecycleStage) ? (
-                      flag.lifecycleStage.length === 1 ? (
-                        <Chip label={flag.lifecycleStage[0]} color={getLifecycleColor(flag.lifecycleStage[0])} size="small" sx={{ color: '#222', fontWeight: 700 }} />
-                      ) : (
-                        <Tooltip title={flag.lifecycleStage.slice(1).join(', ')} arrow>
-                          <Chip
-                            label={flag.lifecycleStage[0] + ' +' + (flag.lifecycleStage.length - 1)}
-                            color={getLifecycleColor(flag.lifecycleStage[0])}
-                            size="small"
-                            sx={{ color: '#222', fontWeight: 700, cursor: 'pointer' }}
-                          />
-                        </Tooltip>
-                      )
-                    ) : (
-                      <Chip label={flag.lifecycleStage} color={getLifecycleColor(flag.lifecycleStage)} size="small" sx={{ color: '#222', fontWeight: 700 }} />
-                    )}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Chip label={`${flag.priorityScore}/10`} color={getPriorityColor(flag.priorityScore)} size="small" />
-                  </TableCell>
-                  <TableCell align="center">
-                    <Chip label={flag.temporary ? 'Yes' : 'No'} color={flag.temporary ? 'warning' : 'default'} size="small" variant="outlined" />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
-    </Paper>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Chip label={`${flag.priorityScore}/10`} color={getPriorityColor(flag.priorityScore)} size="small" />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Chip label={flag.temporary ? 'Yes' : 'No'} color={flag.temporary ? 'warning' : 'default'} size="small" variant="outlined" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      </Paper>
+      <FlagDetailDialog open={dialogOpen} flag={selectedFlag} onClose={() => setDialogOpen(false)} />
+    </>
   );
-};
-
+}
 export default InteractiveAnalysisTable;

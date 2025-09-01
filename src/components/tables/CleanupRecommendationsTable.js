@@ -18,6 +18,7 @@ import {
   Avatar,
 } from '@mui/material';
 import { CheckCircle } from '@mui/icons-material';
+import FlagDetailDialog from '../FlagDetailDialog';
 // Helper to generate a color from a string
 function stringToColor(str) {
   let hash = 0;
@@ -50,9 +51,11 @@ const getLifecycleColor = (stage) => {
 };
 
 const CleanupRecommendationsTable = ({ flags, loading }) => {
-  // State for pagination
+  // State for pagination and flag detail dialog
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedFlag, setSelectedFlag] = useState(null);
 
   const handleChangePage = (event, newPage) => {
   // Handles table page change
@@ -133,7 +136,13 @@ const CleanupRecommendationsTable = ({ flags, loading }) => {
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2">{flag.name || 'No name'}</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ cursor: 'pointer', textDecoration: 'underline' }}
+                        onClick={() => { setSelectedFlag(flag); setDialogOpen(true); }}
+                      >
+                        {flag.name || 'No name'}
+                      </Typography>
                     </Box>
                   </TableCell>
                   <TableCell>
@@ -217,7 +226,7 @@ const CleanupRecommendationsTable = ({ flags, loading }) => {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-  {/* No archive dialog */}
+  <FlagDetailDialog open={dialogOpen} flag={selectedFlag} onClose={() => setDialogOpen(false)} />
     </Paper>
   );
 };

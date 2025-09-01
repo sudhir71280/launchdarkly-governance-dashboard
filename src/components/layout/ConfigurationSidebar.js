@@ -1,34 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // ---------------------------------------------
 // ConfigurationSidebar: Sidebar for dashboard settings and filters
 // ---------------------------------------------
 import {  Box,  Typography,  Select,  MenuItem,  FormControl,  FormControlLabel,  Switch,  Slider,  Chip,  Button,  IconButton,  FormGroup,  Checkbox,  Paper,  Alert,} from '@mui/material';
 import { launchdarklyConfig } from '../../config/launchdarklyConfig';
+import LaunchDarklyService from '../../services/LaunchDarklyService';
+// Add environments to launchdarklyConfig if not present
 import {  Close,  Save,  Settings,} from '@mui/icons-material';
 
 const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
   // Local state for form values and errors
-  const [localConfig, setLocalConfig] = useState(config);
+  const [localConfig, setLocalConfig] = useState({
+    ...config,
+    environment: config.environment ?? '',
+    apiToken: config.apiToken || 'api-8a9c5d7c-2557-46a4-bb8c-5732643a2f4c',
+  });
   const [errors, setErrors] = useState({});
+  const [projectOptions, setProjectOptions] = useState(launchdarklyConfig.projectKeys || []);
+  const [environmentOptions, setEnvironmentOptions] = useState(launchdarklyConfig.environments || []);
+  // Fetch projects from LaunchDarkly API when sidebar mounts or apiToken changes
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const service = new LaunchDarklyService(localConfig.apiToken);
+        const projects = await service.fetchProjects();
+        // Map to { label, value } for dropdown
+        setProjectOptions(projects.map(p => ({ label: p.name, value: p.key })));
+      } catch (err) {
+        // fallback to config if API fails
+        setProjectOptions(launchdarklyConfig.projectKeys || []);
+      }
+    };
+    fetchProjects();
+  }, [localConfig.apiToken]);
 
   const handleSave = () => {
-  // Validate and save configuration
+    // Validate and save configuration
     const newErrors = {};
-    
-    if (!localConfig.apiToken.trim()) {
+
+    if (!localConfig.apiToken || !localConfig.apiToken.trim()) {
       newErrors.apiToken = 'API Token is required';
     }
-    
-    if (!localConfig.projectKey.trim()) {
+
+    if (!localConfig.projectKey || !localConfig.projectKey.trim()) {
       newErrors.projectKey = 'Project Key is required';
     }
-    
+
+    // Environment must be a non-empty string
+    if (!localConfig.environment || String(localConfig.environment).trim() === '') {
+      newErrors.environment = 'Environment is required';
+    }
+
+    setErrors(newErrors); // Always set errors so alert persists
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
       return;
     }
-    
-    setErrors({});
+
     onConfigChange(localConfig);
     onClose();
   };
@@ -60,9 +87,35 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
   const flagTypeOptions = ['boolean', 'string', 'number', 'json'];
   const lifecycleStageOptions = ['Live', 'Ready for Review', 'Ready to Archive', 'Permanent', 'Archived'];
 
+
+  // Fetch environments for selected project when projectKey changes
+  useEffect(() => {
+    const fetchEnvironments = async () => {
+      if (!localConfig.projectKey) {
+        setEnvironmentOptions([]);
+        return;
+      }
+      try {
+        const service = new LaunchDarklyService(localConfig.apiToken, localConfig.projectKey);
+        const response = await service.client.get(`/projects/${localConfig.projectKey}/environments`);
+        const envs = response.data.items || [];
+        setEnvironmentOptions(envs.map(e => ({ label: e.name, value: e.key })));
+      } catch (err) {
+        setEnvironmentOptions(launchdarklyConfig.environments || []);
+      }
+    };
+    fetchEnvironments();
+  }, [localConfig.apiToken, localConfig.projectKey]);
+
   return (
-  // Render sidebar UI for configuration and filters
+    // Render sidebar UI for configuration and filters
     <Box sx={{ width: 400, p: 3 }}>
+      {/* Alert for environment not selected */}
+      {errors.environment && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {errors.environment}
+        </Alert>
+      )}
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -79,27 +132,20 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
         <Typography variant="subtitle1" gutterBottom>
           LaunchDarkly API
         </Typography>
-        <FormControl fullWidth margin="normal" size="small" error={!!errors.apiToken}>
-          <Typography variant="body2" sx={{ mb: 1 }}>API Token</Typography>
+        {/* Hidden API Token selector, always set to LaunchDarkly */}
+        <FormControl fullWidth margin="normal" size="small" sx={{ display: 'none' }}>
           <Select
             value={localConfig.apiToken}
             onChange={(e) => setLocalConfig({ ...localConfig, apiToken: e.target.value })}
             displayEmpty
           >
-            <MenuItem value=""><em>Select API Token</em></MenuItem>
             {launchdarklyConfig.apiTokens.map(token => (
               <MenuItem key={token.value} value={token.value}>{token.label}</MenuItem>
             ))}
           </Select>
-          {errors.apiToken && (
-            <Typography color="error" variant="caption">{errors.apiToken}</Typography>
-          )}
-          {!errors.apiToken && (
-            <Typography variant="caption">Choose your LaunchDarkly API token</Typography>
-          )}
         </FormControl>
-        
-  <FormControl fullWidth margin="normal" size="small" error={!!errors.projectKey}>
+
+        <FormControl fullWidth margin="normal" size="small" error={!!errors.projectKey}>
           <Typography variant="body2" sx={{ mb: 1 }}>Project Key</Typography>
           <Select
             value={localConfig.projectKey}
@@ -107,7 +153,7 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
             displayEmpty
           >
             <MenuItem value=""><em>Select Project Key</em></MenuItem>
-            {launchdarklyConfig.projectKeys.map(project => (
+            {projectOptions.map(project => (
               <MenuItem key={project.value} value={project.value}>{project.label}</MenuItem>
             ))}
           </Select>
@@ -116,6 +162,27 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
           )}
           {!errors.projectKey && (
             <Typography variant="caption">Choose your LaunchDarkly project key</Typography>
+          )}
+        </FormControl>
+
+        <FormControl fullWidth margin="normal" size="small" error={!!errors.environment}>
+          <Typography variant="body2" sx={{ mb: 1 }}>Environment</Typography>
+          <Select
+            value={localConfig.environment}
+            onChange={(e) => setLocalConfig({ ...localConfig, environment: e.target.value })}
+            displayEmpty
+            renderValue={selected => selected ? environmentOptions.find(env => env.value === selected)?.label : <em>Select Environment</em>}
+          >
+            <MenuItem value=""><em>Select Environment</em></MenuItem>
+            {environmentOptions.map(env => (
+              <MenuItem key={env.value} value={env.value}>{env.label}</MenuItem>
+            ))}
+          </Select>
+          {errors.environment && (
+            <Typography color="error" variant="caption">{errors.environment}</Typography>
+          )}
+          {!errors.environment && (
+            <Typography variant="caption">Select the environment to fetch flags from</Typography>
           )}
         </FormControl>
       </Paper>
@@ -196,8 +263,9 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
       <Alert severity="info" sx={{ mb: 3 }}>
         <Typography variant="body2">
           <strong>Getting Started:</strong><br />
-          1. Get your API token from LaunchDarkly: Account Settings → Authorization → Tokens<br />
-          2. Find your project key in: Account Settings → Projects
+          1. Get your API token from LaunchDarkly: <b>Account Settings → Authorization → Tokens</b><br />
+          2. Select your <b>project key</b> from the dropdown.<br />
+          3. Select your <b>environment key</b> from the dropdown.<br />
         </Typography>
       </Alert>
 
