@@ -16,6 +16,7 @@ import {
   Tooltip,
   Box,
   Avatar,
+  TableSortLabel,
 } from '@mui/material';
 import { CheckCircle } from '@mui/icons-material';
 import FlagDetailDialog from '../FlagDetailDialog';
@@ -50,21 +51,76 @@ const getLifecycleColor = (stage) => {
   }
 };
 
-const CleanupRecommendationsTable = ({ flags, loading }) => {
-  // State for pagination and flag detail dialog
+const CleanupRecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercentage = 0 }) => {
+
+  // State for pagination, sorting, and flag detail dialog
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState('owner');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedFlag, setSelectedFlag] = useState(null);
 
   const handleChangePage = (event, newPage) => {
-  // Handles table page change
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
-  // Handles change in rows per page
     setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  // Sorting helpers
+  function descendingComparator(a, b, orderBy) {
+    switch (orderBy) {
+      case 'owner': {
+        const aName = (a._maintainer?.firstName || '') + ' ' + (a._maintainer?.lastName || '');
+        const bName = (b._maintainer?.firstName || '') + ' ' + (b._maintainer?.lastName || '');
+        return bName.localeCompare(aName);
+      }
+      case 'flagName':
+        return (b.name || '').localeCompare(a.name || '');
+      case 'tag': {
+        const aTag = Array.isArray(a.tags) && a.tags.length > 0 ? a.tags[0] : '';
+        const bTag = Array.isArray(b.tags) && b.tags.length > 0 ? b.tags[0] : '';
+        return bTag.localeCompare(aTag);
+      }
+      case 'age':
+        return b.ageDays - a.ageDays;
+      case 'lifecycleStage': {
+        const aStage = Array.isArray(a.lifecycleStage) ? a.lifecycleStage[0] : a.lifecycleStage;
+        const bStage = Array.isArray(b.lifecycleStage) ? b.lifecycleStage[0] : b.lifecycleStage;
+        return (bStage || '').localeCompare(aStage || '');
+      }
+      case 'priority':
+        return b.priorityScore - a.priorityScore;
+      case 'temporary':
+        return (b.temporary === a.temporary) ? 0 : b.temporary ? 1 : -1;
+      default:
+        return 0;
+    }
+  }
+
+  function getComparator(order, orderBy) {
+    return order === 'desc'
+      ? (a, b) => descendingComparator(a, b, orderBy)
+      : (a, b) => -descendingComparator(a, b, orderBy);
+  }
+
+  function stableSort(array, comparator) {
+    const stabilizedThis = array.map((el, index) => [el, index]);
+    stabilizedThis.sort((a, b) => {
+      const cmp = comparator(a[0], b[0]);
+      if (cmp !== 0) return cmp;
+      return a[1] - b[1];
+    });
+    return stabilizedThis.map((el) => el[0]);
+  }
+
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
     setPage(0);
   };
 
@@ -72,9 +128,11 @@ const CleanupRecommendationsTable = ({ flags, loading }) => {
   // Show message if no flags need cleanup
     return (
       <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Cleanup Recommendations
-        </Typography>
+        <Box sx={{ p: 2, pb: 0 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {flags.length} flags require attention
+          </Typography>
+        </Box>
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <CheckCircle sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
           <Typography variant="h6" color="success.main">
@@ -88,31 +146,79 @@ const CleanupRecommendationsTable = ({ flags, loading }) => {
     );
   }
 
-  const paginatedFlags = flags.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-  // Paginate flags for table display
-  // Render table of flags needing cleanup
+  // Sort and paginate flags for table display
+  const sortedFlags = stableSort(flags, getComparator(order, orderBy));
+  const paginatedFlags = sortedFlags.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <Paper sx={{ width: '100%' }}>
-      <Box sx={{ p: 2, pb: 0 }}>
-        <Typography variant="h6" gutterBottom>
-          Cleanup Recommendations
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {flags.length} flags require attention
-        </Typography>
-      </Box>
       <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Owner</TableCell>
-              <TableCell>Flag Name</TableCell>
-              <TableCell>Tag</TableCell>
-              <TableCell align="center">Age (days)</TableCell>
-              <TableCell align="center">Lifecycle Stage</TableCell>
-              <TableCell align="center">Priority</TableCell>
-              <TableCell align="center">Temporary</TableCell>
+              <TableCell sortDirection={orderBy === 'owner' ? order : false}>
+                <TableSortLabel
+                  active={orderBy === 'owner'}
+                  direction={orderBy === 'owner' ? order : 'asc'}
+                  onClick={() => handleRequestSort('owner')}
+                >
+                  Owner
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sortDirection={orderBy === 'flagName' ? order : false}>
+                <TableSortLabel
+                  active={orderBy === 'flagName'}
+                  direction={orderBy === 'flagName' ? order : 'asc'}
+                  onClick={() => handleRequestSort('flagName')}
+                >
+                  Flag Name
+                </TableSortLabel>
+              </TableCell>
+              <TableCell sortDirection={orderBy === 'tag' ? order : false}>
+                <TableSortLabel
+                  active={orderBy === 'tag'}
+                  direction={orderBy === 'tag' ? order : 'asc'}
+                  onClick={() => handleRequestSort('tag')}
+                >
+                  Tag
+                </TableSortLabel>
+              </TableCell>
+              <TableCell align="center" sortDirection={orderBy === 'age' ? order : false}>
+                <TableSortLabel
+                  active={orderBy === 'age'}
+                  direction={orderBy === 'age' ? order : 'asc'}
+                  onClick={() => handleRequestSort('age')}
+                >
+                  Age (days)
+                </TableSortLabel>
+              </TableCell>
+              <TableCell align="center" sortDirection={orderBy === 'lifecycleStage' ? order : false}>
+                <TableSortLabel
+                  active={orderBy === 'lifecycleStage'}
+                  direction={orderBy === 'lifecycleStage' ? order : 'asc'}
+                  onClick={() => handleRequestSort('lifecycleStage')}
+                >
+                  Lifecycle Stage
+                </TableSortLabel>
+              </TableCell>
+              <TableCell align="center" sortDirection={orderBy === 'priority' ? order : false}>
+                <TableSortLabel
+                  active={orderBy === 'priority'}
+                  direction={orderBy === 'priority' ? order : 'asc'}
+                  onClick={() => handleRequestSort('priority')}
+                >
+                  Priority
+                </TableSortLabel>
+              </TableCell>
+              <TableCell align="center" sortDirection={orderBy === 'temporary' ? order : false}>
+                <TableSortLabel
+                  active={orderBy === 'temporary'}
+                  direction={orderBy === 'temporary' ? order : 'asc'}
+                  onClick={() => handleRequestSort('temporary')}
+                >
+                  Temporary
+                </TableSortLabel>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

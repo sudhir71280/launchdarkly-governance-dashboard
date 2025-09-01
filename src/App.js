@@ -4,7 +4,7 @@
 // ------------------------------
 
 import React, { useState, useEffect } from 'react';
-import {  ThemeProvider,  createTheme,  CssBaseline,  Box,  Container,  Grid,  Paper,  Typography,  AppBar, Toolbar,  IconButton,  Drawer,  Button,  Alert,  Tab,  Tabs,  CircularProgress,} from '@mui/material';
+import {  ThemeProvider,  createTheme,  CssBaseline,  Box,  Container,  Grid,  Paper,  Typography,  AppBar, Toolbar,  IconButton,  Drawer,  Button,  Alert,  Tab,  Tabs,  CircularProgress } from '@mui/material';
 import {  Flag,  Refresh,  Menu,  Download,} from '@mui/icons-material';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 
@@ -13,7 +13,6 @@ import MetricsCards from './components/MetricsCards';
 import FlagLifecycleChart from './components/charts/FlagLifecycleChart';
 import AgeDistributionChart from './components/charts/AgeDistributionChart';
 import PriorityBubbleChart from './components/charts/PriorityScatterChart';
-import InteractiveAnalysisTable from './components/tables/InteractiveAnalysisTable';
 import TimelineChart from './components/charts/TimelineChart';
 import FlagTypesChart from './components/charts/FlagTypesChart';
 // import CleanupRecommendationsTable from './components/CleanupRecommendationsTable';
@@ -71,6 +70,7 @@ function App() {
   const [config, setConfig] = useState({
     apiToken: localStorage.getItem('launchdarkly_api_token') || '',
     projectKey: localStorage.getItem('launchdarkly_project_key') || '',
+    environment: localStorage.getItem('launchdarkly_environment') || '',
     ageFilter: 30,
     includeArchived: false,
     flagTypes: ['boolean', 'string', 'number', 'json'],
@@ -141,6 +141,7 @@ function App() {
     // Save to localStorage
     localStorage.setItem('launchdarkly_api_token', newConfig.apiToken);
     localStorage.setItem('launchdarkly_project_key', newConfig.projectKey);
+    localStorage.setItem('launchdarkly_environment', newConfig.environment);
   };
 
   // Exports cleanup candidates to CSV file
@@ -243,22 +244,20 @@ function App() {
           ) : (
             <>
               {/* Metrics Cards */}
-              <MetricsCards metrics={metrics} />
+              <MetricsCards metrics={metrics || {}} />
 
-              {/* Tabs */}
+              {/* Tabs: Overview and Details */}
               <Paper sx={{ width: '100%', mb: 2 }}>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                   <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
                     <Tab label="Overview" />
-                    <Tab label="Analysis" />
-                    <Tab label="Recommendations" />
-                    <Tab label="Alerts" />
+                    <Tab label="Cleanup Recommendations" />
                   </Tabs>
                 </Box>
 
-                {/* Overview Tab */}
+                {/* Overview Tab (restored) */}
                 <TabPanel value={tabValue} index={0}>
-                  <Grid container spacing={1}>
+                  <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                       <FlagLifecycleChart data={metrics.lifecycleStages} />
                     </Grid>
@@ -271,33 +270,37 @@ function App() {
                     <Grid item xs={12} md={6}>
                       <TimelineChart flags={filteredFlags} />
                     </Grid>
-                  </Grid>
-                </TabPanel>
-
-                {/* Analysis Tab */}
-                <TabPanel value={tabValue} index={1}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={12}>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle1" sx={{ mb: 1 }}>Cleanup Priority vs Flag Age</Typography>
                       <PriorityBubbleChart flags={filteredFlags} />
                     </Grid>
-                    <Grid item xs={12} md={12}>
-                      <InteractiveAnalysisTable flags={filteredFlags} />
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle1" sx={{ mb: 1 }}>Governance Alerts</Typography>
+                      <AlertsSection alerts={alerts} metrics={metrics} />
                     </Grid>
                   </Grid>
                 </TabPanel>
 
-                {/* Recommendations Tab */}
-                <TabPanel value={tabValue} index={2}>
-                  <CleanupRecommendationsTable
-                    flags={metrics.cleanupCandidates || []}
-                    onArchive={handleArchiveFlag}
-                    loading={loading}
-                  />
-                </TabPanel>
-
-                {/* Alerts Tab */}
-                <TabPanel value={tabValue} index={3}>
-                  <AlertsSection alerts={alerts} metrics={metrics} />
+                {/* Details Tab: merged Analysis, Recommendations & Alerts */}
+                <TabPanel value={tabValue} index={1}>
+                  {/* Move HIGH Priority alert here */}
+                  {alerts && alerts.length > 0 && alerts.some(a => a.level === 'HIGH') && (
+                    alerts.filter(a => a.level === 'HIGH').map((alert, idx) => (
+                      <Alert key={idx} severity="error" sx={{ mb: 2 }}>
+                        <strong>HIGH Priority:</strong> {alert.message}
+                      </Alert>
+                    ))
+                  )}
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={12}>
+                      <CleanupRecommendationsTable
+                        flags={metrics.cleanupCandidates || []}
+                        onArchive={handleArchiveFlag}
+                        loading={loading}
+                        hideAttentionMessage={true}
+                      />
+                    </Grid>
+                  </Grid>
                 </TabPanel>
               </Paper>
             </>

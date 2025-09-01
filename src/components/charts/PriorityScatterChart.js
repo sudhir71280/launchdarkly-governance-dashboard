@@ -1,10 +1,10 @@
-
-
-
-
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Paper, Typography, Box } from '@mui/material';
+import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line } from 'recharts';
+
+
+
+
 
 // Line chart for flag analysis
 const PriorityLineChart = ({ flags }) => {

@@ -5,38 +5,12 @@ import React from 'react';
 import {
   Typography,
   Alert,
-  AlertTitle,
-  Box,
   Grid,
   Card,
   CardContent,
+  Paper,
+  Divider,
 } from '@mui/material';
-import {
-  Warning,
-  CheckCircle,
-  Info,
-  Error,
-} from '@mui/icons-material';
-
-const getAlertSeverity = (level) => {
-// Maps alert level to MUI severity
-  switch (level) {
-    case 'HIGH': return 'error';
-    case 'MEDIUM': return 'warning';
-    case 'LOW': return 'info';
-    default: return 'info';
-  }
-};
-
-const getAlertIcon = (level) => {
-// Maps alert level to icon
-  switch (level) {
-    case 'HIGH': return <Error />;
-    case 'MEDIUM': return <Warning />;
-    case 'LOW': return <Info />;
-    default: return <Info />;
-  }
-};
 
 const AlertsSection = ({ alerts, metrics }) => {
   // Calculate ratios and averages for insights
@@ -51,42 +25,21 @@ const AlertsSection = ({ alerts, metrics }) => {
   const hasMetrics = totalFlags > 0;
 
   return (
-    <Box>
+    <Paper elevation={3} sx={{ p: 3, mb: 2 }}>
       <Typography variant="h6" gutterBottom>
-        Governance Alerts
+        Governance Alerts & Insights
       </Typography>
-      {/* Alert Messages */}
-      <Box sx={{ mb: 3 }}>
-        {alerts && alerts.length > 0 ? (
-          alerts.map((alert, index) => (
-            <Alert 
-              key={index} 
-              severity={getAlertSeverity(alert.level)} 
-              icon={getAlertIcon(alert.level)}
-              sx={{ mb: 1 }}
-            >
-              <AlertTitle>{alert.level} Priority</AlertTitle>
-              {alert.message}
-            </Alert>
-          ))
-        ) : (
-          <Alert severity="success" icon={<CheckCircle />}>
-            <AlertTitle>All Clear!</AlertTitle>
-            No alerts - your flag governance looks healthy!
-          </Alert>
-        )}
-      </Box>
-
+      <Divider sx={{ mb: 2 }} />
       {/* Governance Insights */}
-      <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
+      <Typography variant="h6" gutterBottom sx={{ mt: 2, fontWeight: 500 }}>
         Governance Insights
       </Typography>
       {hasMetrics ? (
         <Grid container spacing={3}>
           <Grid item xs={12} md={4}>
-            <Card>
+            <Card elevation={1} sx={{ borderRadius: 2 }}>
               <CardContent>
-                <Typography variant="h4" color="primary" gutterBottom>
+                <Typography variant="h4" color="primary" gutterBottom sx={{ fontWeight: 700 }}>
                   {tempRatio.toFixed(1)}%
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
@@ -101,9 +54,9 @@ const AlertsSection = ({ alerts, metrics }) => {
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Card>
+            <Card elevation={1} sx={{ borderRadius: 2 }}>
               <CardContent>
-                <Typography variant="h4" color="warning.main" gutterBottom>
+                <Typography variant="h4" color="warning.main" gutterBottom sx={{ fontWeight: 700 }}>
                   {oldRatio.toFixed(1)}%
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
@@ -118,9 +71,9 @@ const AlertsSection = ({ alerts, metrics }) => {
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Card>
+            <Card elevation={1} sx={{ borderRadius: 2 }}>
               <CardContent>
-                <Typography variant="h4" color="error.main" gutterBottom>
+                <Typography variant="h4" color="error.main" gutterBottom sx={{ fontWeight: 700 }}>
                   {avgPriority.toFixed(1)}/10
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
@@ -140,7 +93,7 @@ const AlertsSection = ({ alerts, metrics }) => {
           No governance metrics available. Please check your data source or refresh.
         </Alert>
       )}
-    </Box>
+    </Paper>
   );
 };
 
