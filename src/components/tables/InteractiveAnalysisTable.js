@@ -18,6 +18,22 @@ function stringToColor(str) {
 }
 
 function descendingComparator(a, b, orderBy) {
+  // Special case for 'owner' column
+  if (orderBy === 'owner') {
+    const ownerA = a._maintainer ? `${a._maintainer.firstName || ''} ${a._maintainer.lastName || ''}`.trim() : '';
+    const ownerB = b._maintainer ? `${b._maintainer.firstName || ''} ${b._maintainer.lastName || ''}`.trim() : '';
+    if (ownerB < ownerA) return -1;
+    if (ownerB > ownerA) return 1;
+    return 0;
+  }
+  // Special case for 'flagname' column
+  if (orderBy === 'flagname') {
+    const nameA = a.name || '';
+    const nameB = b.name || '';
+    if (nameB < nameA) return -1;
+    if (nameB > nameA) return 1;
+    return 0;
+  }
   if (b[orderBy] < a[orderBy]) return -1;
   if (b[orderBy] > a[orderBy]) return 1;
   return 0;
@@ -54,8 +70,9 @@ function getPriorityColor(score) {
   return 'default';
 }
 
-const columns = [
-  { id: 'name', label: 'Name' },
+const columns = [ 
+  { id: 'owner', label: 'Owner' },
+  { id: 'flagname', label: 'Flag Name' },
   { id: 'tags', label: 'Tag' },
   { id: 'ageDays', label: 'Age (days)', numeric: true },
   { id: 'lifecycleStage', label: 'Lifecycle Stage' },
@@ -118,7 +135,13 @@ const InteractiveAnalysisTable = ({ flags }) => {
                       ) : (
                         <Avatar sx={{ width: 28, height: 28, fontSize: 14, bgcolor: '#b71c1c' }}>??</Avatar>
                       )}
-                      <Typography variant="body2">{flag.name || 'No name'}</Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Tooltip title={`Key: ${flag.key}`} arrow>
+                        <Typography variant="body2">{flag.name || 'No name'}</Typography>
+                      </Tooltip>
                     </Box>
                   </TableCell>
                   <TableCell>
