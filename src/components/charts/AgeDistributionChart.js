@@ -13,9 +13,9 @@ const AgeDistributionChart = ({ data }) => {
   }));
 
   if (chartData.length === 0 || chartData.every(item => item.value === 0)) {
-  // Show message if no data is available
+    // Show message if no data is available
     return (
-  // Render bar chart for flag age distribution
+      // Render bar chart for flag age distribution
       <Paper sx={{ p: 3, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography variant="h6" color="text.secondary">
           No data available

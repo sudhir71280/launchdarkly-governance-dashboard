@@ -10,12 +10,12 @@ const TimelineChart = ({ flags }) => {
   // Group flags by creation month for timeline chart
   // Group flags by creation month
   const monthlyData = {};
-  
+
   flags.forEach(flag => {
-  // Extract month from flag creation date
+    // Extract month from flag creation date
     const date = new Date(flag.creationDate);
     const monthKey = format(date, 'yyyy-MM');
-    
+
     if (!monthlyData[monthKey]) {
       monthlyData[monthKey] = { month: monthKey, count: 0 };
     }
@@ -30,9 +30,9 @@ const TimelineChart = ({ flags }) => {
     }));
 
   if (chartData.length === 0) {
-  // Show message if no data is available
+    // Show message if no data is available
     return (
-  // Render line chart of flag creation timeline
+      // Render line chart of flag creation timeline
       <Paper sx={{ p: 3, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography variant="h6" color="text.secondary">
           No data available
@@ -50,18 +50,18 @@ const TimelineChart = ({ flags }) => {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="displayMonth" 
+            <XAxis
+              dataKey="displayMonth"
               angle={-45}
               textAnchor="end"
               height={80}
             />
             <YAxis />
             <Tooltip />
-            <Line 
-              type="monotone" 
-              dataKey="count" 
-              stroke="#FF8042" 
+            <Line
+              type="monotone"
+              dataKey="count"
+              stroke="#FF8042"
               strokeWidth={2}
               dot={{ fill: '#FF8042', r: 4 }}
             />

@@ -35,14 +35,14 @@ function stringToColor(str) {
 }
 
 const getPriorityColor = (score) => {
-// Returns color for priority score
+  // Returns color for priority score
   if (score >= 7) return 'error';
   if (score >= 4) return 'warning';
   return 'success';
 };
 
 const getLifecycleColor = (stage) => {
-// Returns color for lifecycle stage
+  // Returns color for lifecycle stage
   switch (stage) {
     case 'Ready to Archive': return 'error';
     case 'Ready for Review': return 'warning';
@@ -125,7 +125,7 @@ const CleanupRecommendationsTable = ({ flags, loading, metrics = {}, highPriorit
   };
 
   if (!flags || flags.length === 0) {
-  // Show message if no flags need cleanup
+    // Show message if no flags need cleanup
     return (
       <Paper sx={{ p: 3 }}>
         <Box sx={{ p: 2, pb: 0 }}>
@@ -236,7 +236,7 @@ const CleanupRecommendationsTable = ({ flags, loading, metrics = {}, highPriorit
                           </Avatar>
                         </Tooltip>
                       ) : (
-                          <Avatar sx={{ width: 28, height: 28, fontSize: 14, bgcolor: '#b71c1c' }}>??</Avatar>
+                        <Avatar sx={{ width: 28, height: 28, fontSize: 14, bgcolor: '#b71c1c' }}>??</Avatar>
                       )}
                     </Box>
                   </TableCell>
@@ -332,7 +332,7 @@ const CleanupRecommendationsTable = ({ flags, loading, metrics = {}, highPriorit
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-  <FlagDetailDialog open={dialogOpen} flag={selectedFlag} onClose={() => setDialogOpen(false)} />
+      <FlagDetailDialog open={dialogOpen} flag={selectedFlag} onClose={() => setDialogOpen(false)} />
     </Paper>
   );
 };

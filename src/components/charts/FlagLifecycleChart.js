@@ -15,9 +15,9 @@ const FlagLifecycleChart = ({ data }) => {
   }));
 
   if (chartData.length === 0) {
-  // Show message if no data is available
+    // Show message if no data is available
     return (
-  // Render pie chart for flag lifecycle distribution
+      // Render pie chart for flag lifecycle distribution
       <Paper sx={{ p: 3, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography variant="h6" color="text.secondary">
           No data available

@@ -13,9 +13,9 @@ const FlagTypesChart = ({ data }) => {
   }));
 
   if (chartData.length === 0) {
-  // Show message if no data is available
+    // Show message if no data is available
     return (
-  // Render bar chart for flag types
+      // Render bar chart for flag types
       <Paper sx={{ p: 3, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography variant="h6" color="text.secondary">
           No data available

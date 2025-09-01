@@ -46,7 +46,7 @@ const PriorityLineChart = ({ flags }) => {
   };
 
   return (
-  <Paper sx={{ p: 3, height: 320 }}>
+    <Paper sx={{ p: 3, height: 320 }}>
       <Typography variant="h6" gutterBottom>
         Cleanup Priority vs Flag Age
       </Typography>
