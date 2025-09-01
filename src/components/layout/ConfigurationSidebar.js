@@ -62,6 +62,7 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
     if (!localConfig.projectKey || !localConfig.projectKey.trim()) {
       newErrors.projectKey = 'Project Key is required';
     }
+        const [environmentOptions, setEnvironmentOptions] = useState(launchdarklyConfig.environments || []);
 
     // Environment must be a non-empty string
     if (!localConfig.environment || String(localConfig.environment).trim() === '') {
