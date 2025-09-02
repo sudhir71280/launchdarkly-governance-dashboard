@@ -2,23 +2,7 @@ import React, { useState } from 'react';
 // ---------------------------------------------
 // CleanupRecommendationsTable: Table of flags needing cleanup
 // ---------------------------------------------
-import {
-  Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  Chip,
-  Tooltip,
-  Box,
-  Avatar,
-  TableSortLabel,
-} from '@mui/material';
-import { CheckCircle } from '@mui/icons-material';
+import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Chip, Tooltip, Box, Avatar, TableSortLabel, } from '@mui/material';
 import FlagDetailDialog from '../FlagDetailDialog';
 // Helper to generate a color from a string
 function stringToColor(str) {
@@ -124,27 +108,6 @@ const CleanupRecommendationsTable = ({ flags, loading, metrics = {}, highPriorit
     setPage(0);
   };
 
-  if (!flags || flags.length === 0) {
-    // Show message if no flags need cleanup
-    return (
-      <Paper sx={{ p: 3 }}>
-        <Box sx={{ p: 2, pb: 0 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {flags.length} flags require attention
-          </Typography>
-        </Box>
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <CheckCircle sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
-          <Typography variant="h6" color="success.main">
-            No flags require cleanup attention!
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            All flags are properly maintained.
-          </Typography>
-        </Box>
-      </Paper>
-    );
-  }
 
   // Sort and paginate flags for table display
   const sortedFlags = stableSort(flags, getComparator(order, orderBy));
@@ -223,7 +186,6 @@ const CleanupRecommendationsTable = ({ flags, loading, metrics = {}, highPriorit
           </TableHead>
           <TableBody>
             {paginatedFlags.map((flag) => {
-              console.log('Rendering flag:', flag);
               return (
                 <TableRow key={flag.key} hover>
                   <TableCell>
@@ -259,21 +221,17 @@ const CleanupRecommendationsTable = ({ flags, loading, metrics = {}, highPriorit
                           <Chip
                             key={flag.tags[0]}
                             label={flag.tags[0]}
-                            size="small"
-                            sx={{ bgcolor: stringToColor(flag.tags[0]), color: '#222', fontWeight: 700 }}
-                          />
+                            size="small" />
                         ) : (
                           <Tooltip title={flag.tags.slice(1).join(', ')} arrow>
                             <Chip
                               key={flag.tags[0]}
                               label={flag.tags[0] + ' +' + (flag.tags.length - 1)}
-                              size="small"
-                              sx={{ bgcolor: stringToColor(flag.tags[0]), color: '#222', fontWeight: 700, cursor: 'pointer' }}
-                            />
+                              size="small" />
                           </Tooltip>
                         )
                       ) : (
-                        <Chip label="No tags" size="small" sx={{ bgcolor: '#bdbdbd', color: '#222', fontWeight: 700 }} />
+                        <Chip label="No tags" size="small" />
                       )}
                     </Box>
                   </TableCell>
@@ -285,19 +243,17 @@ const CleanupRecommendationsTable = ({ flags, loading, metrics = {}, highPriorit
                   <TableCell align="center">
                     {Array.isArray(flag.lifecycleStage) ? (
                       flag.lifecycleStage.length === 1 ? (
-                        <Chip label={flag.lifecycleStage[0]} color={getLifecycleColor(flag.lifecycleStage[0])} size="small" sx={{ color: '#fff', fontWeight: 700 }} />
+                        <Chip label={flag.lifecycleStage[0]} color={getLifecycleColor(flag.lifecycleStage[0])} size="small" />
                       ) : (
-                        <Tooltip title={flag.lifecycleStage.slice(1).join(', ')} arrow>
+                        <Tooltip title={flag.lifecycleStage.slice(1).join(', ')} >
                           <Chip
                             label={flag.lifecycleStage[0] + ' +' + (flag.lifecycleStage.length - 1)}
                             color={getLifecycleColor(flag.lifecycleStage[0])}
-                            size="small"
-                            sx={{ color: '#fff', fontWeight: 700, cursor: 'pointer' }}
-                          />
+                            size="small" />
                         </Tooltip>
                       )
                     ) : (
-                      <Chip label={flag.lifecycleStage} color={getLifecycleColor(flag.lifecycleStage)} size="small" sx={{ color: '#fff', fontWeight: 700 }} />
+                      <Chip label={flag.lifecycleStage} color={getLifecycleColor(flag.lifecycleStage)} size="small" />
                     )}
                   </TableCell>
                   <TableCell align="center">
