@@ -68,10 +68,6 @@ function App() {
         apiToken: localStorage.getItem('launchdarkly_api_token') || '',
         projectKey: localStorage.getItem('launchdarkly_project_key') || '',
         environment: localStorage.getItem('launchdarkly_environment') || '',
-        ageFilter: 30,
-        includeArchived: false,
-        flagTypes: ['boolean', 'string', 'number', 'json'],
-        lifecycleStages: ['Ready for Review', 'Ready to Archive'],
     });
 
     // Snackbar for notifications
@@ -118,20 +114,7 @@ function App() {
 
 
 
-    // Archives a flag and refreshes dashboard data
-    const handleArchiveFlag = async (flagKey) => {
-        try {
-            setLoading(true);
-            await launchDarklyService.archiveFlag(flagKey);
-            enqueueSnackbar(`Flag ${flagKey} archived successfully`, { variant: 'success' });
-            await loadData(); // Refresh data
-        } catch (error) {
-            enqueueSnackbar(`Error archiving flag: ${error.message}`, { variant: 'error' });
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    
     // Updates configuration and saves to localStorage
     const handleConfigChange = (newConfig) => {
         setConfig(newConfig);
@@ -153,15 +136,6 @@ function App() {
         link.click();
         window.URL.revokeObjectURL(url);
     };
-
-    // Filters flags based on user-selected filters
-    const filteredFlags = flagsData.filter(flag => {
-        if (!config.includeArchived && flag.archived) return false;
-        if (flag.ageDays < config.ageFilter) return false;
-        if (!config.flagTypes.includes(flag.kind)) return false;
-        if (config.lifecycleStages.length && !config.lifecycleStages.includes(flag.lifecycleStage)) return false;
-        return true;
-    });
 
     return (
         <ThemeProvider theme={theme}>
@@ -266,10 +240,10 @@ function App() {
                                             <AgeDistributionChart data={metrics.ageDistribution} />
                                         </Grid>
                                         <Grid item xs={12} md={6}>
-                                            <TimelineChart flags={filteredFlags} />
+                                            <TimelineChart flags={flagsData} />
                                         </Grid>
                                         <Grid item xs={12} md={6}>
-                                            <PriorityBubbleChart flags={filteredFlags} />
+                                            <PriorityBubbleChart flags={flagsData} />
                                         </Grid>
                                         <Grid item xs={12} md={6}>
                                             <AlertsSection alerts={alerts} metrics={metrics} />
@@ -291,7 +265,6 @@ function App() {
                                         <Grid item xs={12} md={12}>
                                             <CleanupRecommendationsTable
                                                 flags={metrics.cleanupCandidates || []}
-                                                onArchive={handleArchiveFlag}
                                                 loading={loading}
                                                 hideAttentionMessage={true}
                                             />

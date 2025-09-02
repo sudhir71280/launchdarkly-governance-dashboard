@@ -14,7 +14,7 @@ const FlagLifecycleChart = ({ data }) => {
     value,
   }));
 
-  if (chartData.length === 0) {
+  if (chartData.every(d => d.value === 0)) {
     // Show message if no data is available
     return (
       // Render pie chart for flag lifecycle distribution

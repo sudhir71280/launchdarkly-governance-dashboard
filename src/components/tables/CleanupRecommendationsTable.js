@@ -223,6 +223,7 @@ const CleanupRecommendationsTable = ({ flags, loading, metrics = {}, highPriorit
           </TableHead>
           <TableBody>
             {paginatedFlags.map((flag) => {
+              console.log('Rendering flag:', flag);
               return (
                 <TableRow key={flag.key} hover>
                   <TableCell>
