@@ -9,7 +9,7 @@ import { Flag, Refresh, Menu, Download, } from '@mui/icons-material';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 
 // Import custom components
-import MetricsCards from './components/MetricsCards';
+import DashboardCards from './components/DashboardCards';
 import AgeDistributionChart from './components/charts/AgeDistributionChart';
 import PriorityBubbleChart from './components/charts/PriorityScatterChart';
 import TimelineChart from './components/charts/TimelineChart';
@@ -203,7 +203,7 @@ function App() {
 
                                 {/* Dashboard Tab: Metrics Cards */}
                                 <TabPanel value={tabValue} index={0}>
-                                    <MetricsCards metrics={metrics || {}} />
+                                    <DashboardCards metrics={metrics || {}} />
                                 </TabPanel>
 
                                 {/* Charts Tab (restored) */}

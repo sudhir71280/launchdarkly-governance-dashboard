@@ -1,6 +1,6 @@
 import React from 'react';
 // ---------------------------------------------
-// MetricsCards: Displays summary cards for flag metrics
+// DashboardCards: Displays summary cards for flag metrics
 // ---------------------------------------------
 import {
     Grid,
@@ -78,7 +78,7 @@ const MetricCard = ({ title, value, icon, color = 'primary', progress, descripti
     );
 };
 
-const MetricsCards = ({ metrics, description }) => {
+const DashboardCards = ({ metrics, description }) => {
     // Calculate percentages for progress bars
     const totalActive = metrics.totalFlags - (metrics.archivedFlags || 0);
     const tempPercentage = totalActive > 0 ? ((metrics.temporaryFlags || 0) / totalActive) * 100 : 0;
@@ -179,4 +179,4 @@ const MetricsCards = ({ metrics, description }) => {
     );
 };
 
-export default MetricsCards;
+export default DashboardCards;
