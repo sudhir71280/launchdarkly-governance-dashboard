@@ -215,20 +215,23 @@ function App() {
                         </Alert>
                     ) : (
                         <>
-                            {/* Metrics Cards */}
-                            <MetricsCards metrics={metrics || {}} />
-
-                            {/* Tabs: Overview and Details */}
+                            {/* Tabs: Dashboard, Charts, Cleanup Recommendations */}
                             <Paper sx={{ width: '100%', mb: 2 }}>
                                 <Box sx={{ borderBottom: 0, borderColor: 'divider' }}>
                                     <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
-                                        <Tab label="Overview" />
+                                        <Tab label="Dashboard" />
+                                        <Tab label="Charts" />
                                         <Tab label="Cleanup Recommendations" />
                                     </Tabs>
                                 </Box>
 
-                                {/* Overview Tab (restored) */}
+                                {/* Dashboard Tab: Metrics Cards */}
                                 <TabPanel value={tabValue} index={0}>
+                                    <MetricsCards metrics={metrics || {}} />
+                                </TabPanel>
+
+                                {/* Charts Tab (restored) */}
+                                <TabPanel value={tabValue} index={1}>
                                     <Grid container spacing={2}>
                                         <Grid item xs={12} md={6}>
                                             <FlagLifecycleChart data={metrics.lifecycleStages} />
@@ -251,13 +254,21 @@ function App() {
                                     </Grid>
                                 </TabPanel>
 
-                                {/* Details Tab: merged Analysis, Recommendations & Alerts */}
-                                <TabPanel value={tabValue} index={1}>
+                                {/* Cleanup Recommendations Tab */}
+                                <TabPanel value={tabValue} index={2}>
                                     {/* Move HIGH Priority alert here */}
                                     {alerts && alerts.length > 0 && alerts.some(a => a.level === 'HIGH') && (
                                         alerts.filter(a => a.level === 'HIGH').map((alert, idx) => (
                                             <Alert key={idx} severity="error" sx={{ mb: 2 }}>
                                                 <strong>HIGH Priority:</strong> {alert.message}
+                                            </Alert>
+                                        ))
+                                    )}
+                                    {/* Move MEDIUM Priority alert here */}
+                                    {alerts && alerts.length > 0 && alerts.some(a => a.level === 'MEDIUM') && (
+                                        alerts.filter(a => a.level === 'MEDIUM').map((alert, idx) => (
+                                            <Alert key={idx} severity="warning" sx={{ mb: 2 }}>
+                                                <strong>MEDIUM Priority:</strong> {alert.message}
                                             </Alert>
                                         ))
                                     )}

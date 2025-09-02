@@ -9,8 +9,8 @@ export function analyzeFlags(flags) {
         temporaryFlags: 0,
         permanentFlags: 0,
         archivedFlags: 0,
-        readyToArchive: 0,
-        highPriority: 0,
+        readyToArchive: 0, // Count of flags with lifecycleStage 'Ready to Archive'
+        readyToReview: 0,  // Count of flags with lifecycleStage 'Ready to Review'
         ageDistribution: { '0-30': 0, '31-90': 0, '91-180': 0, '180+': 0 },
         flagTypes: {},
         lifecycleStages: {},
@@ -67,26 +67,29 @@ export function analyzeFlags(flags) {
 
             // --- Cleanup Candidate Logic ---
             // A flag is a cleanup candidate if:
-            //   - Its lifecycleStage is 'Ready for Archive' OR 'Ready for Review' (case-insensitive, locale-invariant)
-            //   - OR its priorityScore is 7 or higher
-            // This ensures we catch both explicit and high-priority flags.
+            //   - Its lifecycleStage is 'Ready to Archive' (case-insensitive, locale-invariant)
+            //   - OR its lifecycleStage is 'Ready for Review' (case-insensitive, locale-invariant)
+            // This ensures we catch both explicit cleanup stages.
             const isReadyToArchive =
                 typeof lifecycleStage === 'string' &&
                 lifecycleStage.trim().localeCompare('Ready to Archive', undefined, { sensitivity: 'base' }) === 0;
             const isReadyForReview =
                 typeof lifecycleStage === 'string' &&
                 lifecycleStage.trim().localeCompare('Ready for Review', undefined, { sensitivity: 'base' }) === 0;
-            const isHighPriority = priorityScore >= 7;
 
-            if (isReadyToArchive || isReadyForReview || isHighPriority) {
-                // Track metrics for dashboard cards and alerts
+            if (isReadyToArchive || isReadyForReview) {
+                // Track metrics for dashboard cards
                 if (isReadyToArchive) metrics.readyToArchive++;
-                if (isHighPriority) metrics.highPriority++;
+                if (isReadyForReview) metrics.readyToReview++;
                 // Add to cleanup candidates list for table display
                 metrics.cleanupCandidates.push(analyzedFlag);
             }
         }
     });
+    // Count high priority flags (priorityScore >= 7 and not archived)
+    metrics.highPriority = analyzedFlags.filter(f => f.priorityScore >= 7 && !f.archived).length;
+    // Count medium priority flags (priorityScore >= 4 && priorityScore < 7 and not archived)
+    metrics.mediumPriority = analyzedFlags.filter(f => f.priorityScore >= 4 && f.priorityScore < 7 && !f.archived).length;
 
     metrics.cleanupCandidates.sort((a, b) => b.priorityScore - a.priorityScore);
     const alerts = generateAlerts(metrics);
@@ -159,16 +162,17 @@ export function calculatePriorityScore(flag, ageDays) {
 export function generateAlerts(metrics) {
     const alerts = [];
     if (metrics.highPriority > 10) {
+        let msg = `${metrics.highPriority} high-priority flags need immediate attention.`;
         alerts.push({
             level: 'HIGH',
-            message: `${metrics.highPriority} flags require immediate attention`,
+            message: msg,
             type: 'cleanup',
         });
     }
-    if (metrics.readyToArchive > 20) {
+    if (metrics.mediumPriority > 0) {
         alerts.push({
             level: 'MEDIUM',
-            message: `${metrics.readyToArchive} flags are ready to archive`,
+            message: `${metrics.mediumPriority} flags should be reviewed soon`,
             type: 'cleanup',
         });
     }
