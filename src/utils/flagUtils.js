@@ -8,7 +8,6 @@ export function analyzeFlags(flags) {
         totalFlags: flags.length,
         temporaryFlags: 0,
         permanentFlags: 0,
-        archivedFlags: 0,
         readyToArchive: 0, // Count of flags with lifecycleStage 'Ready to Archive'
         readyToReview: 0,  // Count of flags with lifecycleStage 'Ready to Review'
         ageDistribution: { '0-30': 0, '31-90': 0, '91-180': 0, '180+': 0 },
@@ -31,54 +30,51 @@ export function analyzeFlags(flags) {
         };
         analyzedFlags.push(analyzedFlag);
 
-        if (flag.archived) {
-            metrics.archivedFlags++;
-        } else {
-            if (flag.temporary) {
-                metrics.temporaryFlags++;
-            }
-            else {
-                metrics.permanentFlags++;
-            }
-            if (ageDays <= 30) {
-                metrics.ageDistribution['0-30']++;
-            }
-            else if (ageDays <= 90) {
-                metrics.ageDistribution['31-90']++;
-            }
-            else if (ageDays <= 180) {
-                metrics.ageDistribution['91-180']++;
-            }
-            else {
-                metrics.ageDistribution['180+']++;
-            }
-            // Track flag type and lifecycle stage counts
-            metrics.flagTypes[flag.kind] = (metrics.flagTypes[flag.kind] || 0) + 1;
-            metrics.lifecycleStages[lifecycleStage] = (metrics.lifecycleStages[lifecycleStage] || 0) + 1;
+        if (flag.temporary) {
+            metrics.temporaryFlags++;
+        }
+        else {
+            metrics.permanentFlags++;
+        }
+        if (ageDays <= 30) {
+            metrics.ageDistribution['0-30']++;
+        }
+        else if (ageDays <= 90) {
+            metrics.ageDistribution['31-90']++;
+        }
+        else if (ageDays <= 180) {
+            metrics.ageDistribution['91-180']++;
+        }
+        else {
+            metrics.ageDistribution['180+']++;
+        }
+        // Track flag type and lifecycle stage counts
+        metrics.flagTypes[flag.kind] = (metrics.flagTypes[flag.kind] || 0) + 1;
+        metrics.lifecycleStages[lifecycleStage] = (metrics.lifecycleStages[lifecycleStage] || 0) + 1;
 
-            // --- Cleanup Candidate Logic ---
-            // A flag is a cleanup candidate if:
-            //   - Its lifecycleStage is 'Ready to Archive' (case-insensitive, locale-invariant)
-            //   - OR its lifecycleStage is 'Ready for Review' (case-insensitive, locale-invariant)
-            // This ensures we catch both explicit cleanup stages.
-            const isReadyToArchive =
-                typeof lifecycleStage === 'string' &&
-                lifecycleStage.trim().localeCompare('Ready to Archive', undefined, { sensitivity: 'base' }) === 0;
-            const isReadyForReview =
-                typeof lifecycleStage === 'string' &&
-                lifecycleStage.trim().localeCompare('Ready for Review', undefined, { sensitivity: 'base' }) === 0;
+        // --- Cleanup Candidate Logic ---
+        // A flag is a cleanup candidate if:
+        //   - Its lifecycleStage is 'Ready to Archive' (case-insensitive, locale-invariant)
+        //   - OR its lifecycleStage is 'Ready for Review' (case-insensitive, locale-invariant)
+        // This ensures we catch both explicit cleanup stages.
+        const isReadyToArchive = typeof lifecycleStage === 'string' && lifecycleStage.trim().localeCompare('Ready to Archive', undefined, { sensitivity: 'base' }) === 0;
+        const isReadyForReview = typeof lifecycleStage === 'string' && lifecycleStage.trim().localeCompare('Ready for Review', undefined, { sensitivity: 'base' }) === 0;
 
-            if (isReadyToArchive || isReadyForReview) {
-                // Track metrics for dashboard cards
-                if (isReadyToArchive) metrics.readyToArchive++;
-                if (isReadyForReview) metrics.readyToReview++;
-                // Add to cleanup candidates list for table display
-                metrics.cleanupCandidates.push(analyzedFlag);
+        if (isReadyToArchive || isReadyForReview) {
+            // Track metrics for dashboard cards
+            if (isReadyToArchive) {
+                metrics.readyToArchive++;
             }
+            if (isReadyForReview) {
+                metrics.readyToReview++;
+            }
+            // Add to cleanup candidates list for table display
+            metrics.cleanupCandidates.push(analyzedFlag);
         }
     });
     // Count high priority flags (priorityScore >= 7 and not archived)
     metrics.highPriority = analyzedFlags.filter(f => f.priorityScore >= 7 && !f.archived).length;
+
     // Count medium priority flags (priorityScore >= 4 && priorityScore < 7 and not archived)
     metrics.mediumPriority = analyzedFlags.filter(f => f.priorityScore >= 4 && f.priorityScore < 7 && !f.archived).length;
 
@@ -90,7 +86,9 @@ export function analyzeFlags(flags) {
 export function determineLifecycleStage(flag, ageDays) {
     // Determine lifecycle stage for a feature flag
     // 1. Archived flags are always 'Archived'
-    if (flag.archived) return 'Archived';
+    if (flag.archived) {
+        return 'Archived';
+    }
 
     // 2. Temporary flags have staged lifecycle
     if (flag.temporary) {

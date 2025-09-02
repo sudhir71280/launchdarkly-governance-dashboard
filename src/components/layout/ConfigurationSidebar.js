@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 // ---------------------------------------------
 // ConfigurationSidebar: Sidebar for dashboard settings and filters
 // ---------------------------------------------
-import { Box, Typography, Select, MenuItem, FormControl, Button, IconButton, Paper, Alert, } from '@mui/material';
+import { Box, Typography, Select, MenuItem, FormControl, Button, IconButton, Paper, } from '@mui/material';
 import { launchdarklyConfig } from '../../config/launchdarklyConfig';
 import LaunchDarklyService from '../../services/LaunchDarklyService';
 // Add environments to launchdarklyConfig if not present
@@ -12,28 +12,11 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
   // Local state for form values and errors
   const [localConfig, setLocalConfig] = useState({
     ...config,
-    environment: config.environment ?? '',
     apiToken: config.apiToken || 'api-8a9c5d7c-2557-46a4-bb8c-5732643a2f4c',
+    projectKey: config.projectKey || '',
   });
-  const [environmentOptions, setEnvironmentOptions] = useState(launchdarklyConfig.environments || []);
-  const [errors, setErrors] = useState(() => {
-    return (!config.environment || String(config.environment).trim() === '')
-      ? { environment: 'Environment is required' }
-      : {};
-  });
+  const [errors, setErrors] = useState({});
 
-  // Always validate environment on change and when environment options update
-  useEffect(() => {
-    if (!localConfig.environment || String(localConfig.environment).trim() === '') {
-      setErrors(prev => ({ ...prev, environment: 'Environment is required' }));
-    } else {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.environment;
-        return newErrors;
-      });
-    }
-  }, [localConfig.environment, environmentOptions]);
   const [projectOptions, setProjectOptions] = useState(launchdarklyConfig.projectKeys || []);
   // Fetch projects from LaunchDarkly API when sidebar mounts or apiToken changes
   useEffect(() => {
@@ -42,10 +25,18 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
         const service = new LaunchDarklyService(localConfig.apiToken);
         const projects = await service.fetchProjects();
         // Map to { label, value } for dropdown
-        setProjectOptions(projects.map(p => ({ label: p.name, value: p.key })));
+        const options = projects.map(p => ({ label: p.name, value: p.key }));
+        setProjectOptions(options);
+        // If current projectKey is not in options, reset to blank or first available
+        if (localConfig.projectKey && !options.some(opt => opt.value === localConfig.projectKey)) {
+          setLocalConfig(lc => ({ ...lc, projectKey: options.length > 0 ? options[0].value : '' }));
+        }
       } catch (err) {
         // fallback to config if API fails
         setProjectOptions(launchdarklyConfig.projectKeys || []);
+        if (localConfig.projectKey && !(launchdarklyConfig.projectKeys || []).some(opt => opt.value === localConfig.projectKey)) {
+          setLocalConfig(lc => ({ ...lc, projectKey: '' }));
+        }
       }
     };
     fetchProjects();
@@ -54,59 +45,22 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
   const handleSave = () => {
     // Validate and save configuration
     const newErrors = {};
-
     if (!localConfig.apiToken || !localConfig.apiToken.trim()) {
       newErrors.apiToken = 'API Token is required';
     }
-
     if (!localConfig.projectKey || !localConfig.projectKey.trim()) {
       newErrors.projectKey = 'Project Key is required';
     }
-
-    // Environment must be a non-empty string
-    if (!localConfig.environment || String(localConfig.environment).trim() === '') {
-      newErrors.environment = 'Environment is required';
-    }
-
-    setErrors(newErrors); // Always set errors so alert persists
+    setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
       return;
     }
-
-    // Clear errors on successful save
     setErrors({});
     onConfigChange(localConfig);
     onClose();
   };
-
-  // Fetch environments for selected project when projectKey changes
-  useEffect(() => {
-    const fetchEnvironments = async () => {
-      if (!localConfig.projectKey) {
-        setEnvironmentOptions([]);
-        return;
-      }
-      try {
-        const service = new LaunchDarklyService(localConfig.apiToken, localConfig.projectKey);
-        const response = await service.client.get(`/projects/${localConfig.projectKey}/environments`);
-        const envs = response.data.items || [];
-        setEnvironmentOptions(envs.map(e => ({ label: e.name, value: e.key })));
-      } catch (err) {
-        setEnvironmentOptions(launchdarklyConfig.environments || []);
-      }
-    };
-    fetchEnvironments();
-  }, [localConfig.apiToken, localConfig.projectKey]);
-
   return (
-    // Render sidebar UI for configuration and filters
     <Box sx={{ width: 400, p: 3 }}>
-      {/* Alert for environment not selected */}
-      {errors.environment && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {errors.environment}
-        </Alert>
-      )}
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -117,10 +71,8 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
           <Close />
         </IconButton>
       </Box>
-
       {/* API Configuration */}
       <Paper sx={{ p: 2, mb: 2 }}>
-        {/* Hidden API Token selector, always set to LaunchDarkly */}
         <FormControl fullWidth margin="normal" size="small" sx={{ disabled: 'disabled' }}>
           <Typography variant="body2" sx={{ mb: 1 }}>Provider Key</Typography>
           <Select
@@ -134,7 +86,6 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
             ))}
           </Select>
         </FormControl>
-
         <FormControl fullWidth margin="normal" size="small" error={!!errors.projectKey}>
           <Typography variant="body2" sx={{ mb: 1 }}>Project Key</Typography>
           <Select
@@ -150,43 +101,11 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
           {errors.projectKey && (
             <Typography color="error" variant="caption">{errors.projectKey}</Typography>
           )}
-          {!errors.projectKey && (
-            <Typography variant="caption">Choose your LaunchDarkly project key</Typography>
-          )}
-        </FormControl>
-
-        <FormControl fullWidth margin="normal" size="small" error={!!errors.environment}>
-          <Typography variant="body2" sx={{ mb: 1 }}>Environment</Typography>
-          <Select
-            value={localConfig.environment || ''}
-            onChange={(e) => {
-              const value = e.target.value;
-              setLocalConfig({ ...localConfig, environment: value });
-              // Validation is handled by useEffect above
-            }}
-            displayEmpty
-            renderValue={selected => {
-              if (!selected || !environmentOptions.length) {
-                return <em>Select Environment</em>;
-              }
-              const found = environmentOptions.find(env => env.value === selected);
-              return found ? found.label : <em>Select Environment</em>;
-            }}
-          >
-            <MenuItem value=""><em>Select Environment</em></MenuItem>
-            {environmentOptions.map(env => (
-              <MenuItem key={env.value} value={env.value}>{env.label}</MenuItem>
-            ))}
-          </Select>
-          {errors.environment && (
-            <Typography color="error" variant="caption">{errors.environment}</Typography>
-          )}
-          {!errors.environment && (
-            <Typography variant="caption">Select the environment to fetch flags from</Typography>
+          {!errors.projectKey && (!localConfig.projectKey || localConfig.projectKey.trim() === "") && (
+            <Typography variant="caption" color="error">Choose your LaunchDarkly project key</Typography>
           )}
         </FormControl>
       </Paper>
-
       {/* Actions */}
       <Box sx={{ display: 'flex', gap: 2 }}>
         <Button
@@ -194,19 +113,13 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
           onClick={handleSave}
           startIcon={<Save />}
           fullWidth
-          disabled={
-            !localConfig.environment ||
-            String(localConfig.environment).trim() === '' ||
-            localConfig.environment === '' ||
-            localConfig.environment === undefined ||
-            !environmentOptions.some(env => env.value === localConfig.environment)
-          }
+          disabled={!localConfig.projectKey || localConfig.projectKey.trim() === ""}
         >
           Save Configuration
         </Button>
       </Box>
     </Box>
   );
-};
+}
 
 export default ConfigurationSidebar;

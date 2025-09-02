@@ -62,7 +62,6 @@ function App() {
     const [config, setConfig] = useState({
         apiToken: localStorage.getItem('launchdarkly_api_token') || '',
         projectKey: localStorage.getItem('launchdarkly_project_key') || '',
-        environment: localStorage.getItem('launchdarkly_environment') || '',
     });
 
     // Snackbar for notifications
@@ -90,7 +89,7 @@ function App() {
 
         setLoading(true);
         try {
-            const data = await launchDarklyService.fetchFlags();
+            const data = await launchDarklyService.fetchFlags(true);
             const analyzedData = analyzeFlags(data.items || []);
 
             setFlagsData(analyzedData.flags);
@@ -116,7 +115,6 @@ function App() {
         // Save to localStorage
         localStorage.setItem('launchdarkly_api_token', newConfig.apiToken);
         localStorage.setItem('launchdarkly_project_key', newConfig.projectKey);
-        localStorage.setItem('launchdarkly_environment', newConfig.environment);
     };
 
     // Exports cleanup candidates to CSV file

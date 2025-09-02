@@ -20,15 +20,16 @@ export class LaunchDarklyService {
         });
     }
 
-    async fetchFlags() {
-        // Fetches all flags for the given project, paginated
+    async fetchFlags({ includeArchived = false } = {}) {
+        // Fetches all flags for the given project, paginated. Optionally includes archived flags.
         try {
             let allFlags = [];
             let offset = 0;
             let totalCount = null;
             const limit = 100;
+            const archivedParam = includeArchived ? '&archived=true' : '';
             do {
-                const response = await this.client.get(`/flags/${this.projectKey}?limit=${limit}&offset=${offset}`);
+                const response = await this.client.get(`/flags/${this.projectKey}?limit=${limit}&offset=${offset}${archivedParam}`);
                 const data = response.data;
                 if (data.items) {
                     allFlags = allFlags.concat(data.items);
@@ -40,7 +41,6 @@ export class LaunchDarklyService {
             } while (allFlags.length < totalCount && allFlags.length < 500);
             return { items: allFlags };
         } catch (error) {
-            // Remove console.error to avoid warnings in console
             throw new Error(`Failed to fetch flags: ${error.response?.data?.message || error.message}`);
         }
     }
