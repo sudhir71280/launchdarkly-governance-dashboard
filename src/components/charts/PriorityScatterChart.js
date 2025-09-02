@@ -46,12 +46,12 @@ const PriorityLineChart = ({ flags }) => {
   };
 
   return (
-    <Paper sx={{ p: 3, height: 320 }}>
+    <Paper sx={{ p: 3, height: 500 }}>
       <Typography variant="h6" gutterBottom>
         Cleanup Priority vs Flag Age
       </Typography>
       <Box sx={{ height: 350, pb: 1 }}>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={400}>
           <LineChart data={chartData} margin={{ bottom: 40 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
             <XAxis

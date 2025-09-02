@@ -186,8 +186,15 @@ const CleanupRecommendationsTable = ({ flags, loading, metrics = {}, highPriorit
           </TableHead>
           <TableBody>
             {paginatedFlags.map((flag) => {
+              // Determine row color by priority
+              let rowBg = '';
+              if (flag.priorityScore >= 7) {
+                rowBg = 'rgba(255, 56, 56, 0.08)'; // High priority: light red
+              } else if (flag.priorityScore >= 4) {
+                rowBg = 'rgba(255, 215, 0, 0.10)'; // Medium priority: light yellow
+              }
               return (
-                <TableRow key={flag.key} hover>
+                <TableRow key={flag.key} hover sx={rowBg ? { background: rowBg } : {}}>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       {flag._maintainer?.firstName && flag._maintainer?.lastName ? (

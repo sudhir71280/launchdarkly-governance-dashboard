@@ -10,15 +10,10 @@ import { SnackbarProvider, useSnackbar } from 'notistack';
 
 // Import custom components
 import MetricsCards from './components/MetricsCards';
-import FlagLifecycleChart from './components/charts/FlagLifecycleChart';
 import AgeDistributionChart from './components/charts/AgeDistributionChart';
 import PriorityBubbleChart from './components/charts/PriorityScatterChart';
 import TimelineChart from './components/charts/TimelineChart';
-import FlagTypesChart from './components/charts/FlagTypesChart';
-// import CleanupRecommendationsTable from './components/CleanupRecommendationsTable';
 import CleanupRecommendationsTable from './components/tables/CleanupRecommendationsTable';
-import AlertsSection from './components/AlertsSection';
-// import ConfigurationSidebar from './components/ConfigurationSidebar';
 import ConfigurationSidebar from './components/layout/ConfigurationSidebar';
 import { LaunchDarklyService } from './services/LaunchDarklyService';
 
@@ -114,7 +109,7 @@ function App() {
 
 
 
-    
+
     // Updates configuration and saves to localStorage
     const handleConfigChange = (newConfig) => {
         setConfig(newConfig);
@@ -150,17 +145,25 @@ function App() {
                             onClick={() => setDrawerOpen(true)}
                             sx={{ mr: 2 }}
                         >
-                            <Menu />
+                            <Menu sx={{ fontSize: 40 }} />
                         </IconButton>
-                        <Flag sx={{ mr: 2 }} />
-                        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                            LaunchDarkly Governance Dashboard
-                        </Typography>
+                        <Flag sx={{ mr: 2, fontSize: 40 }} />
+                        <Box sx={{ flexGrow: 1 }}>
+                            <Typography variant="h6" component="div" sx={{ fontWeight: 700 }}>
+                                LaunchDarkly Governance Dashboard
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>
+                                Project: <strong>{config.projectKey ? config.projectKey : 'N/A'}</strong>
+                                {' | Last updated: '}
+                                <strong>{lastUpdate ? lastUpdate.toLocaleTimeString() : 'N/A'}</strong>
+                            </Typography>
+                        </Box>
                         <Button
                             color="inherit"
-                            startIcon={<Refresh />}
+                            startIcon={<Refresh sx={{ fontSize: 40 }} />}
                             onClick={loadData}
                             disabled={loading}
+                            sx={{ fontSize: 20, fontWeight: 400 }}
                         >
                             {loading ? <CircularProgress size={20} color="inherit" /> : 'Refresh'}
                         </Button>
@@ -182,33 +185,6 @@ function App() {
 
                 {/* Add top margin to prevent content from being hidden behind fixed AppBar */}
                 <Container maxWidth="xl" sx={{ mt: 10, mb: 2 }}>
-                    {/* Status Bar */}
-                    <Paper sx={{ p: 2, mb: 2 }}>
-                        <Grid container alignItems="center" spacing={2}>
-                            <Grid item xs={12} md={6}>
-                                <Typography variant="body2" color="text.secondary">
-                                    Project: <strong>{config.projectKey || 'Not configured'}</strong>
-                                    {lastUpdate && (
-                                        <>
-                                            {' | Last updated: '}
-                                            <strong>{lastUpdate.toLocaleTimeString()}</strong>
-                                        </>
-                                    )}
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12} md={6} sx={{ textAlign: { md: 'right' } }}>
-                                <Button
-                                    startIcon={<Download />}
-                                    onClick={handleExportData}
-                                    disabled={!metrics.cleanupCandidates?.length}
-                                    size="small"
-                                >
-                                    Export CSV
-                                </Button>
-                            </Grid>
-                        </Grid>
-                    </Paper>
-
                     {!config.apiToken || !config.projectKey ? (
                         <Alert severity="warning" sx={{ mb: 2 }}>
                             Please configure your LaunchDarkly API credentials using the menu button.
@@ -234,22 +210,13 @@ function App() {
                                 <TabPanel value={tabValue} index={1}>
                                     <Grid container spacing={2}>
                                         <Grid item xs={12} md={6}>
-                                            <FlagLifecycleChart data={metrics.lifecycleStages} />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <FlagTypesChart data={metrics.flagTypes} />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
                                             <AgeDistributionChart data={metrics.ageDistribution} />
                                         </Grid>
                                         <Grid item xs={12} md={6}>
                                             <TimelineChart flags={flagsData} />
                                         </Grid>
-                                        <Grid item xs={12} md={6}>
+                                        <Grid item xs={12} md={12}>
                                             <PriorityBubbleChart flags={flagsData} />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <AlertsSection alerts={alerts} metrics={metrics} />
                                         </Grid>
                                     </Grid>
                                 </TabPanel>
@@ -271,6 +238,27 @@ function App() {
                                                 <strong>MEDIUM Priority:</strong> {alert.message}
                                             </Alert>
                                         ))
+                                    )}
+                                    {/* Export CSV button for cleanup candidates */}
+                                    {metrics.cleanupCandidates && metrics.cleanupCandidates.length > 0 && (
+                                        <Box sx={{ textAlign: 'right', mb: 2 }}>
+                                            <Button
+                                                startIcon={<Download />}
+                                                onClick={handleExportData}
+                                                size="medium"
+                                                sx={{
+                                                    background: 'linear-gradient(90deg, #1976d2 0%, #2196f3 100%)',
+                                                    color: 'white',
+                                                    fontWeight: 600,
+                                                    boxShadow: '0 2px 8px rgba(25, 118, 210, 0.10)',
+                                                    '&:hover': {
+                                                        background: 'linear-gradient(90deg, #1565c0 0%, #1976d2 100%)',
+                                                    },
+                                                }}
+                                            >
+                                                Export CSV
+                                            </Button>
+                                        </Box>
                                     )}
                                     <Grid container spacing={3}>
                                         <Grid item xs={12} md={12}>

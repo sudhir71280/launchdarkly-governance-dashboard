@@ -31,15 +31,6 @@ export function analyzeFlags(flags) {
         };
         analyzedFlags.push(analyzedFlag);
 
-        // Debug log for lifecycleStage and priorityScore
-        if (typeof window !== 'undefined') {
-            console.log('Flag:', {
-                name: flag.name,
-                lifecycleStage: analyzedFlag.lifecycleStage,
-                priorityScore: analyzedFlag.priorityScore
-            });
-        }
-
         if (flag.archived) {
             metrics.archivedFlags++;
         } else {
@@ -155,7 +146,6 @@ export function calculatePriorityScore(flag, ageDays) {
     }
 
     // Cap score at 10 for dashboard consistency
-    console.log(`Calculated priority score for flag ${flag.name}: ${score}`);
     return Math.min(score, 10);
 }
 

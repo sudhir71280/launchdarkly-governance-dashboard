@@ -1,11 +1,20 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box } from '@mui/material';
 
-const FlagDetailDialog = ({ open, flag, onClose }) => {
-    console.log('FlagDetailDialog render', { json: JSON.stringify(flag) });
+const FlagDetailDialog = ({ open, flag, onClose, project = 'bff', lastUpdated = '' }) => {
     if (!flag) return null;
     return (
         <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+            {/* Project Info Bar */}
+            <Box sx={{ bgcolor: '#3a3a7c', color: '#fff', px: 3, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTopLeftRadius: 8, borderTopRightRadius: 8 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: 1, fontSize: 22, display: 'flex', alignItems: 'center' }}>
+                    <span role="img" aria-label="project" style={{ marginRight: 12, fontSize: 28 }}>📁</span>
+                    Project: {project}
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: 500, fontSize: 18, color: '#fff', opacity: 0.85 }}>
+                    Last updated: {lastUpdated}
+                </Typography>
+            </Box>
             <DialogTitle sx={{ bgcolor: '#1976d2', color: '#fff', fontWeight: 600, fontSize: 22, letterSpacing: 1 }}>
                 Flag Details
             </DialogTitle>
