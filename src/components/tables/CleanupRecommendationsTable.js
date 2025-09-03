@@ -19,10 +19,11 @@ function stringToColor(str) {
 }
 
 const getPriorityColor = (score) => {
-  // Returns color for priority score
-  if (score >= 7) return 'error';
-  if (score >= 4) return 'warning';
-  return 'success';
+  // Red for priority >7, warning for 4-7, pink for <4
+  if (score > 7) return 'error';      // Red for lowest priority (8-10)
+  if (score >= 4 && score <= 7) return 'warning'; // Warning for medium priority (4-7)
+  if (score < 4) return 'pink';       // Pink for highest priority (1-3)
+  return 'default';
 };
 
 const getLifecycleColor = (stage) => {

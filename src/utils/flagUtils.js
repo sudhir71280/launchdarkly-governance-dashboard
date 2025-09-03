@@ -72,15 +72,10 @@ export function analyzeFlags(flags) {
             metrics.cleanupCandidates.push(analyzedFlag);
         }
     });
-    // Count high priority flags (priorityScore >= 7 and not archived)
-    metrics.highPriority = analyzedFlags.filter(f => f.priorityScore >= 7 && !f.archived).length;
-
-    // Count medium priority flags (priorityScore >= 4 && priorityScore < 7 and not archived)
-    metrics.mediumPriority = analyzedFlags.filter(f => f.priorityScore >= 4 && f.priorityScore < 7 && !f.archived).length;
 
     metrics.cleanupCandidates.sort((a, b) => b.priorityScore - a.priorityScore);
-    const alerts = generateAlerts(metrics);
-    return { flags: analyzedFlags, metrics, alerts };
+
+    return { flags: analyzedFlags, metrics };
 }
 
 export function determineLifecycleStage(flag, ageDays) {
@@ -92,12 +87,15 @@ export function determineLifecycleStage(flag, ageDays) {
 
     // 2. Temporary flags have staged lifecycle
     if (flag.temporary) {
-        if (ageDays < 30) {
-            return 'Live'; // Recently created temporary flag
-        } else if (ageDays < 90) {
-            return 'Ready for Review'; // Temporary flag, review after 30 days
-        } else {
-            return 'Ready to Archive'; // Temporary flag, archive after 90 days
+        if (flag.tags && flag.tags.includes('ReadyToArchive')) {
+            return 'Ready to Archive'; // Permanent flag
+        }
+        else {
+            if (ageDays < 30) {
+                return 'Live'; // Recently created temporary flag
+            } else {
+                return 'Ready for Review'; // Temporary flag, review after 30 days
+            }
         }
     }
 
@@ -116,6 +114,10 @@ export function calculatePriorityScore(flag, ageDays) {
     // - Environment count: Fewer environments means easier cleanup
 
     let score = 0;
+
+    if (flag.tags && flag.tags.includes('ReadyToArchive')) {
+        score += 10;
+    }
 
     // Age scoring
     // 0-30 days: 0 points (new flag)
@@ -145,34 +147,6 @@ export function calculatePriorityScore(flag, ageDays) {
 
     // Cap score at 10 for dashboard consistency
     return Math.min(score, 10);
-}
-
-export function generateAlerts(metrics) {
-    const alerts = [];
-    if (metrics.highPriority > 10) {
-        let msg = `${metrics.highPriority} high-priority flags need immediate attention.`;
-        alerts.push({
-            level: 'HIGH',
-            message: msg,
-            type: 'cleanup',
-        });
-    }
-    if (metrics.mediumPriority > 0) {
-        alerts.push({
-            level: 'MEDIUM',
-            message: `${metrics.mediumPriority} flags should be reviewed soon`,
-            type: 'cleanup',
-        });
-    }
-    const activeFlags = metrics.totalFlags - metrics.archivedFlags;
-    if (activeFlags > 500) {
-        alerts.push({
-            level: 'MEDIUM',
-            message: `${activeFlags} active flags may impact performance`,
-            type: 'performance',
-        });
-    }
-    return alerts;
 }
 
 export function exportCleanupCandidatesToCSV(cleanupCandidates) {

@@ -58,7 +58,6 @@ function App() {
     const [lastUpdate, setLastUpdate] = useState(null);
     const [flagsData, setFlagsData] = useState([]);
     const [metrics, setMetrics] = useState({});
-    const [alerts, setAlerts] = useState([]);
     const [config, setConfig] = useState({
         apiToken: localStorage.getItem('launchdarkly_api_token') || '',
         projectKey: localStorage.getItem('launchdarkly_project_key') || '',
@@ -94,7 +93,6 @@ function App() {
 
             setFlagsData(analyzedData.flags);
             setMetrics(analyzedData.metrics);
-            setAlerts(analyzedData.alerts);
             setLastUpdate(new Date());
 
             enqueueSnackbar('Data loaded successfully', { variant: 'success' });
@@ -221,22 +219,6 @@ function App() {
 
                                 {/* Cleanup Recommendations Tab */}
                                 <TabPanel value={tabValue} index={2}>
-                                    {/* Move HIGH Priority alert here */}
-                                    {alerts && alerts.length > 0 && alerts.some(a => a.level === 'HIGH') && (
-                                        alerts.filter(a => a.level === 'HIGH').map((alert, idx) => (
-                                            <Alert key={idx} severity="error" sx={{ mb: 2 }}>
-                                                <strong>HIGH Priority:</strong> {alert.message}
-                                            </Alert>
-                                        ))
-                                    )}
-                                    {/* Move MEDIUM Priority alert here */}
-                                    {alerts && alerts.length > 0 && alerts.some(a => a.level === 'MEDIUM') && (
-                                        alerts.filter(a => a.level === 'MEDIUM').map((alert, idx) => (
-                                            <Alert key={idx} severity="warning" sx={{ mb: 2 }}>
-                                                <strong>MEDIUM Priority:</strong> {alert.message}
-                                            </Alert>
-                                        ))
-                                    )}
                                     {/* Export CSV button for cleanup candidates */}
                                     {metrics.cleanupCandidates && metrics.cleanupCandidates.length > 0 && (
                                         <Box sx={{ textAlign: 'right', mb: 2 }}>
