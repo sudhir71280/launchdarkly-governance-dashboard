@@ -260,7 +260,16 @@ function App() {
 
                                 {/* Standards Tab: Launch Darkly Flags Lifecycle Standards */}
                                 <TabPanel value={tabValue} index={3}>
-                                    <FlagLifeCycleStandards metrics={metrics || {}} />
+                                    {/* Mermaid diagram for flag lifecycle standards */}
+                                    <Box sx={{ p: 2 }}>
+                                        <Typography variant="h6" gutterBottom>
+                                            Feature Flag Governance Flow
+                                        </Typography>
+                                        {/* Show the chart image directly on the page */}
+                                        <Box sx={{ mt: 2, textAlign: 'center' }}>
+                                            <img src="/mermaidchart/mermaidchart.png" alt="Flag Lifecycle Chart" width="70%" height="80%" style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }} />
+                                        </Box>
+                                    </Box>
                                 </TabPanel>
                             </Paper>
                         </>

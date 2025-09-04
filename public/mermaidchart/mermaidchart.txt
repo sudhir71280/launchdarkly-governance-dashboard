@@ -1,7 +1,3 @@
----
-config:
-  layout: dagre
----
 flowchart TB
     DefinePurpose["Create flag with specified Purpose, Lifecycle & Owner"] -- Yes --> ArchiveTagTemp@{ label: "Is 'Ready to Archive' Tag Attached?" }
     ArchiveTagTemp -- Yes --> CodeCleanupTemp["Send for Code Cleanup"]
