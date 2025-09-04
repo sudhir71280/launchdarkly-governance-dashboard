@@ -11,7 +11,6 @@ import { SnackbarProvider, useSnackbar } from 'notistack';
 
 // Import custom components
 import DashboardCards from './components/DashboardCards';
-import FlagLifeCycleStandards from './components/FlagLifeCycleStandards';
 import AgeDistributionChart from './components/charts/AgeDistributionChart';
 import PriorityBubbleChart from './components/charts/PriorityScatterChart';
 import TimelineChart from './components/charts/TimelineChart';
