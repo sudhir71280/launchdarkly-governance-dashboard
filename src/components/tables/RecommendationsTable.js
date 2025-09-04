@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 // ---------------------------------------------
-// CleanupRecommendationsTable: Table of flags needing cleanup
+// RecommendationsTable: Table of flags needing cleanup
 // ---------------------------------------------
 import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Chip, Tooltip, Box, Avatar, TableSortLabel, } from '@mui/material';
 import FlagDetailDialog from '../FlagDetailDialog';
@@ -36,7 +36,7 @@ const getLifecycleColor = (stage) => {
   }
 };
 
-const CleanupRecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercentage = 0 }) => {
+const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercentage = 0 }) => {
 
   // State for pagination, sorting, and flag detail dialog
   const [page, setPage] = useState(0);
@@ -302,4 +302,4 @@ const CleanupRecommendationsTable = ({ flags, loading, metrics = {}, highPriorit
   );
 };
 
-export default CleanupRecommendationsTable;
+export default RecommendationsTable;

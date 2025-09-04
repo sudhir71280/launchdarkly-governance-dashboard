@@ -14,8 +14,9 @@ import DashboardCards from './components/DashboardCards';
 import AgeDistributionChart from './components/charts/AgeDistributionChart';
 import PriorityBubbleChart from './components/charts/PriorityScatterChart';
 import TimelineChart from './components/charts/TimelineChart';
-import CleanupRecommendationsTable from './components/tables/CleanupRecommendationsTable';
+import RecommendationsTable from './components/tables/RecommendationsTable';
 import ConfigurationSidebar from './components/layout/ConfigurationSidebar';
+import FlagGovernanceStandards from './components/FlagGovernanceStandards';
 import { LaunchDarklyService } from './services/LaunchDarklyService';
 
 import './styles/App.css';
@@ -248,7 +249,7 @@ function App() {
                                     )}
                                     <Grid container spacing={3}>
                                         <Grid item xs={12} md={12}>
-                                            <CleanupRecommendationsTable
+                                            <RecommendationsTable
                                                 flags={flagsData || []}
                                                 loading={loading}
                                                 hideAttentionMessage={true}
@@ -259,16 +260,7 @@ function App() {
 
                                 {/* Standards Tab: Launch Darkly Flags Lifecycle Standards */}
                                 <TabPanel value={tabValue} index={3}>
-                                    {/* Mermaid diagram for flag lifecycle standards */}
-                                    <Box sx={{ p: 2 }}>
-                                        <Typography variant="h6" gutterBottom>
-                                            Feature Flag Governance Flow
-                                        </Typography>
-                                        {/* Show the chart image directly on the page */}
-                                        <Box sx={{ mt: 2, textAlign: 'center' }}>
-                                            <img src="/mermaidchart/mermaidchart.png" alt="Flag Lifecycle Chart" width="70%" height="80%" style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }} />
-                                        </Box>
-                                    </Box>
+                                    <FlagGovernanceStandards />
                                 </TabPanel>
                             </Paper>
                         </>
