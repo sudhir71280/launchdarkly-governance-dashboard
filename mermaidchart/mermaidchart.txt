@@ -1,0 +1,39 @@
+flowchart TB
+    Start(["Start"]):::start --> FlagCreated["Flag Created"]:::process
+    FlagCreated --> DefinePurpose["Define Flag Purpose, Lifecycle & Owner"]:::process
+    DefinePurpose --> IsTemporary{"Is Flag Temporary?"}:::decision
+
+    %% Temporary Flag Flow
+    IsTemporary -- Yes --> ArchiveTagTemp{"Is 'Ready to Archive' Tag Attached?"}:::decision
+    ArchiveTagTemp -- Yes --> CodeCleanupTemp["Send for Code Cleanup"]:::process
+    CodeCleanupTemp --> CleanupReviewTemp{"Cleanup Success?"}:::decision
+    CleanupReviewTemp -- Yes --> ArchiveTemp["Archive The Flag"]:::process
+    CleanupReviewTemp -- No --> ReworkTemp["Rework Cleanup"]:::process
+    ArchiveTemp --> End(["End"]):::'end'
+    ReworkTemp --> CodeCleanupTemp
+    ArchiveTagTemp -- No --> CheckAgeTemp{"Age > 30 Days?"}:::decision
+    CheckAgeTemp -- No --> MonitorTemp["Monitor & Review"]:::noaction
+    MonitorTemp --> End
+    CheckAgeTemp -- Yes --> FlagReviewTemp["Mark The Flag </br> Ready for Review"]:::process
+    FlagReviewTemp --> ReviewOutcomeTemp{"Review Outcome"}:::decision
+    ReviewOutcomeTemp -- Retire --> MarkReadyTemp["Add 'Ready to Archive' Tag"]:::process
+    ReviewOutcomeTemp -- Keep --> MonitorTemp
+    MarkReadyTemp --> ArchiveTagTemp
+
+    %% Permanent Flag Flow
+    IsTemporary -- No --> ArchiveTagPerm{"Ready to Archive Tag Attached?"}:::decision
+    ArchiveTagPerm -- Yes --> CodeCleanupPerm["Send for Code Cleanup"]:::process
+    CodeCleanupPerm --> CleanupReviewPerm{"Cleanup Success?"}:::decision
+    CleanupReviewPerm -- Yes --> ArchivePerm["Archive Flag"]:::process
+    CleanupReviewPerm -- No --> ReworkPerm["Rework Cleanup"]:::process
+    ArchivePerm --> End
+    ReworkPerm --> CodeCleanupPerm
+
+    ArchiveTagPerm -- No --> MonitorPerm["Monitor & Review"]:::noaction
+    MonitorPerm --> End
+
+    classDef start fill:#5A9BD4,stroke:#333,stroke-width:2px,color:#fff,font-weight:bold;
+    classDef 'end' fill:#70AD47,stroke:#333,stroke-width:2px,color:#fff,font-weight:bold;
+    classDef decision fill:#FFD966,stroke:#333,stroke-width:2px,color:#333,font-weight:bold;
+    classDef process fill:#A9D08E,stroke:#333,stroke-width:2px,color:#000;
+    classDef noaction fill:#CCCCCC,stroke:#333,stroke-width:2px,color:#666,font-style:italic;

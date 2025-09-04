@@ -103,30 +103,30 @@ const DashboardCards = ({ metrics, description }) => {
                         icon={<Flag />}
                         color="success"
                         progress={permanentPercentage}
-                        description="Permanent flags (age &gt;30 days)."
+                        description="Permanent flags defined at creation."
                     />
                 </Grid>
                 <Grid item xs={12} sm={4} md={4}>
-                    <MetricCard
-                        title="Live Flags"
-                        value={metrics.lifecycleStages?.Live || 0}
-                        icon={<Flag />}
-                        color="info"
-                        progress={liveFlagsPercentage}
-                        description="Temporary and permanent flags created within the past 30 days."
-                    />
-                </Grid>               
-            </Grid>
-            {/* Row 2 */}
-            <Grid container spacing={3} sx={{ mb: 3 }}>
-                 <Grid item xs={12} sm={4} md={4}>
                     <MetricCard
                         title="Temporary Flags"
                         value={metrics.temporaryFlags - (metrics.lifecycleStages?.Live || 0)}
                         icon={<Schedule />}
                         color="secondary" // pink
                         progress={tempPercentage}
-                        description="Flags those were marked as temporary at the time of creation in LaunchDarkly.."
+                        description="Temporary flags defined at creation."
+                    />
+                </Grid>
+            </Grid>
+            {/* Row 2 */}
+            <Grid container spacing={3} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={4} md={4}>
+                    <MetricCard
+                        title="Ready to Archive"
+                        value={metrics.readyToArchive}
+                        icon={<Archive />}
+                        color="error" // red
+                        progress={readyToArchivePercentage}
+                        description="Flags tagged as ‘Ready to Archive’"
                     />
                 </Grid>
                 <Grid item xs={12} sm={4} md={4}>
@@ -136,17 +136,17 @@ const DashboardCards = ({ metrics, description }) => {
                         icon={<Warning />}
                         color="warning" // yellow
                         progress={readyToReviewPercentage}
-                        description="Temporary flags (age &lt;90 days)."
+                        description="Temporary flags (age &gt;30 days)."
                     />
-                </Grid>
+                </Grid>                
                 <Grid item xs={12} sm={4} md={4}>
                     <MetricCard
-                        title="Ready to Archive"
-                        value={metrics.readyToArchive}
-                        icon={<Archive />}
-                        color="error" // red
-                        progress={readyToArchivePercentage}
-                        description="Temporary flags (age &gt;90 days)."
+                        title="Live Flags"
+                        value={metrics.lifecycleStages?.Live || 0}
+                        icon={<Flag />}
+                        color="info"
+                        progress={liveFlagsPercentage}
+                        description="Flags created within the past 30 days."
                     />
                 </Grid>
             </Grid>

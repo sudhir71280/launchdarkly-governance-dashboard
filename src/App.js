@@ -5,11 +5,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme, CssBaseline, Box, Container, Grid, Paper, Typography, AppBar, Toolbar, IconButton, Drawer, Button, Alert, Tab, Tabs, CircularProgress } from '@mui/material';
-import { Flag, Refresh, Menu, Download, } from '@mui/icons-material';
+import { Flag, Refresh, Menu, Download, AssignmentTurnedIn } from '@mui/icons-material';
+import { Warning } from '@mui/icons-material';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 
 // Import custom components
 import DashboardCards from './components/DashboardCards';
+import FlagLifeCycleStandards from './components/FlagLifeCycleStandards';
 import AgeDistributionChart from './components/charts/AgeDistributionChart';
 import PriorityBubbleChart from './components/charts/PriorityScatterChart';
 import TimelineChart from './components/charts/TimelineChart';
@@ -191,15 +193,20 @@ function App() {
                             <Paper sx={{ width: '100%', mb: 2 }}>
                                 <Box sx={{ borderBottom: 0, borderColor: 'divider' }}>
                                     <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
-                                        <Tab label="Dashboard" />
-                                        <Tab label="Charts" />
-                                        <Tab label="Cleanup Recommendations" />
+                                        <Tab icon={<Flag sx={{ fontSize: 24, mr: 1 }} color="primary" />} label="Dashboard" iconPosition="start" />
+                                        <Tab icon={<Download sx={{ fontSize: 24, mr: 1 }} color="secondary" />} label="Charts" iconPosition="start" />
+                                        <Tab icon={<Warning sx={{ fontSize: 24, mr: 1 }} color="warning" />} label="Cleanup Recommendations" iconPosition="start" />
+                                        <Tab icon={<AssignmentTurnedIn sx={{ fontSize: 24, mr: 1 }} color="success" />} label="Standards" iconPosition="start" />
                                     </Tabs>
                                 </Box>
 
+
                                 {/* Dashboard Tab: Metrics Cards */}
                                 <TabPanel value={tabValue} index={0}>
-                                    <DashboardCards metrics={metrics || {}} />
+                                    <Grid container spacing={2} marginTop={2}>
+                                        <Grid item xs={12} md={6}></Grid>
+                                        <DashboardCards metrics={metrics || {}} />
+                                    </Grid>
                                 </TabPanel>
 
                                 {/* Charts Tab (restored) */}
@@ -250,12 +257,17 @@ function App() {
                                         </Grid>
                                     </Grid>
                                 </TabPanel>
+
+                                {/* Standards Tab: Launch Darkly Flags Lifecycle Standards */}
+                                <TabPanel value={tabValue} index={3}>
+                                    <FlagLifeCycleStandards metrics={metrics || {}} />
+                                </TabPanel>
                             </Paper>
                         </>
                     )}
                 </Container>
             </Box>
-        </ThemeProvider>
+        </ThemeProvider >
     );
 }
 
