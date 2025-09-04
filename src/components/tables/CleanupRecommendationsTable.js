@@ -19,10 +19,10 @@ function stringToColor(str) {
 }
 
 const getPriorityColor = (score) => {
-  // Red for priority >7, warning for 4-7, pink for <4
+  // Red for priority >7, warning for 4-7, success for <4
   if (score > 7) return 'error';      // Red for lowest priority (8-10)
   if (score >= 4 && score <= 7) return 'warning'; // Warning for medium priority (4-7)
-  if (score < 4) return 'pink';       // Pink for highest priority (1-3)
+  if (score < 4) return 'success';    // Green for highest priority (1-3)
   return 'default';
 };
 
@@ -31,7 +31,7 @@ const getLifecycleColor = (stage) => {
   switch (stage) {
     case 'Ready to Archive': return 'error';
     case 'Ready for Review': return 'warning';
-    case 'Live': return 'success';
+    case 'Live': return 'success'; // green
     default: return 'default';
   }
 };
@@ -110,7 +110,7 @@ const CleanupRecommendationsTable = ({ flags, loading, metrics = {}, highPriorit
   };
 
 
-  // Sort and paginate flags for table display
+  // Show all flags passed in props (Live, Ready to Archive, Ready for Review)
   const sortedFlags = stableSort(flags, getComparator(order, orderBy));
   const paginatedFlags = sortedFlags.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 

@@ -250,7 +250,7 @@ function App() {
                                     <Grid container spacing={3}>
                                         <Grid item xs={12} md={12}>
                                             <CleanupRecommendationsTable
-                                                flags={metrics.cleanupCandidates || []}
+                                                flags={flagsData || []}
                                                 loading={loading}
                                                 hideAttentionMessage={true}
                                             />

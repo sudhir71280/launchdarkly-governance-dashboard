@@ -6,13 +6,11 @@ export function analyzeFlags(flags) {
     const analyzedFlags = [];
     const metrics = {
         totalFlags: flags.length,
-        temporaryFlags: 0,
-        permanentFlags: 0,
-        readyToArchive: 0, // Count of flags with lifecycleStage 'Ready to Archive'
-        readyToReview: 0,  // Count of flags with lifecycleStage 'Ready to Review'
         ageDistribution: { '0-30': 0, '31-90': 0, '91-180': 0, '180+': 0 },
-        flagTypes: {},
-        lifecycleStages: {},
+        lifecycleStages: {
+            'Ready to Archive': 0,
+            'Ready for Review': 0,
+        },
         cleanupCandidates: [],
     };
 
@@ -30,12 +28,6 @@ export function analyzeFlags(flags) {
         };
         analyzedFlags.push(analyzedFlag);
 
-        if (flag.temporary) {
-            metrics.temporaryFlags++;
-        }
-        else {
-            metrics.permanentFlags++;
-        }
         if (ageDays <= 30) {
             metrics.ageDistribution['0-30']++;
         }
@@ -48,9 +40,11 @@ export function analyzeFlags(flags) {
         else {
             metrics.ageDistribution['180+']++;
         }
-        // Track flag type and lifecycle stage counts
-        metrics.flagTypes[flag.kind] = (metrics.flagTypes[flag.kind] || 0) + 1;
-        metrics.lifecycleStages[lifecycleStage] = (metrics.lifecycleStages[lifecycleStage] || 0) + 1;
+
+        // Only count Ready to Archive and Ready for Review lifecycle stages
+        if (lifecycleStage === 'Ready to Archive' || lifecycleStage === 'Ready for Review' || lifecycleStage === 'Live') {
+            metrics.lifecycleStages[lifecycleStage] = (metrics.lifecycleStages[lifecycleStage] || 0) + 1;
+        }
 
         // --- Cleanup Candidate Logic ---
         // A flag is a cleanup candidate if:
@@ -59,15 +53,7 @@ export function analyzeFlags(flags) {
         // This ensures we catch both explicit cleanup stages.
         const isReadyToArchive = typeof lifecycleStage === 'string' && lifecycleStage.trim().localeCompare('Ready to Archive', undefined, { sensitivity: 'base' }) === 0;
         const isReadyForReview = typeof lifecycleStage === 'string' && lifecycleStage.trim().localeCompare('Ready for Review', undefined, { sensitivity: 'base' }) === 0;
-
         if (isReadyToArchive || isReadyForReview) {
-            // Track metrics for dashboard cards
-            if (isReadyToArchive) {
-                metrics.readyToArchive++;
-            }
-            if (isReadyForReview) {
-                metrics.readyToReview++;
-            }
             // Add to cleanup candidates list for table display
             metrics.cleanupCandidates.push(analyzedFlag);
         }
@@ -85,25 +71,17 @@ export function determineLifecycleStage(flag, ageDays) {
         return 'Archived';
     }
 
-    // 2. Temporary flags have staged lifecycle
-    if (flag.temporary) {
-        if (flag.tags && flag.tags.includes('ReadyToArchive')) {
-            return 'Ready to Archive'; // Permanent flag
-        }
-        else {
-            if (ageDays < 30) {
-                return 'Live'; // Recently created temporary flag
-            } else {
-                return 'Ready for Review'; // Temporary flag, review after 30 days
-            }
-        }
-    }
+    // 2. Flags lifecycle
 
-    // 3. Permanent flags
-    if (ageDays < 30) {
-        return 'Live'; // Recently created permanent flag
-    } else {
-        return 'Permanent'; // Permanent flag, older than 30 days
+    if (flag.tags && flag.tags.includes('ReadyToArchive')) {
+        return 'Ready to Archive';
+    }
+    else {
+        if (ageDays <= 30) {
+            return 'Live'; // Recently created temporary flag
+        } else {
+            return 'Ready for Review'; // Temporary flag, review after 30 days
+        }
     }
 }
 
@@ -131,9 +109,6 @@ export function calculatePriorityScore(flag, ageDays) {
     } else if (ageDays > 30) {
         score += 2;
     }
-
-    // Temporary flag bonus
-    // Temporary flags are more likely to be cleanup candidates
     if (flag.temporary) {
         score += 2;
     }
