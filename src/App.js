@@ -5,8 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme, CssBaseline, Box, Container, Grid, Paper, Typography, AppBar, Toolbar, IconButton, Drawer, Button, Alert, Tab, Tabs, CircularProgress } from '@mui/material';
-import { Flag, Refresh, Menu, Download, AssignmentTurnedIn } from '@mui/icons-material';
-import { Warning } from '@mui/icons-material';
+import { Flag, Menu, Download, AssignmentTurnedIn, Warning, Refresh } from '@mui/icons-material';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 
 // Import custom components
@@ -17,6 +16,7 @@ import TimelineChart from './components/charts/TimelineChart';
 import RecommendationsTable from './components/tables/RecommendationsTable';
 import ConfigurationSidebar from './components/layout/ConfigurationSidebar';
 import FlagGovernanceStandards from './components/FlagGovernanceStandards';
+import { CircularProgress } from '@mui/material';
 import { LaunchDarklyService } from './services/LaunchDarklyService';
 
 import './styles/App.css';
@@ -27,7 +27,7 @@ const theme = createTheme({
     palette: {
         mode: 'light',
         primary: {
-            main: '#1976d2',
+            main: '#dde5eeff',
         },
         secondary: {
             main: '#dc004e',
@@ -135,19 +135,30 @@ function App() {
             <CssBaseline />
             <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                 {/* App Bar - fixed position */}
-                <AppBar position="fixed">
-                    <Toolbar>
-                        <IconButton
-                            color="inherit"
-                            edge="start"
-                            onClick={() => setDrawerOpen(true)}
-                            sx={{ mr: 2 }}
-                        >
-                            <Menu sx={{ fontSize: 40 }} />
-                        </IconButton>
-                        <Flag sx={{ mr: 2, fontSize: 40 }} />
+                <AppBar position="fixed" sx={{ background: 'linear-gradient(90deg, #1976d2 0%, #2196f3 100%)', boxShadow: 3, minHeight: 72 }}>
+                    <Toolbar sx={{ minHeight: 72, display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2 }}>
+                        {/* Left: Hamburger menu */}
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <IconButton edge="start" onClick={() => setDrawerOpen(true)} sx={{
+                                mr: 2,
+                                color: '#fff',
+                                background: 'linear-gradient(135deg, #1976d2 0%, #00c6ff 100%)',
+                                borderRadius: 2,
+                                p: 0.5,
+                                boxShadow: 3,
+                                border: '2px solid #fff',
+                                transition: 'transform 0.15s, box-shadow 0.15s',
+                                '&:hover': {
+                                    background: 'linear-gradient(135deg, #00c6ff 0%, #1976d2 100%)',
+                                    transform: 'scale(1.08)',
+                                    boxShadow: '0 0 0 4px #90caf9',
+                                },
+                            }}>
+                                <Menu sx={{ fontSize: 36 }} />
+                            </IconButton>
+                        </Box>
                         <Box sx={{ flexGrow: 1 }}>
-                            <Typography variant="h6" component="div" sx={{ fontWeight: 700 }}>
+                            <Typography variant="h6" component="div" sx={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>
                                 LaunchDarkly Governance Dashboard
                             </Typography>
                             <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>
@@ -156,16 +167,56 @@ function App() {
                                 <strong>{lastUpdate ? lastUpdate.toLocaleTimeString() : 'N/A'}</strong>
                             </Typography>
                         </Box>
-                        <Button
-                            color="inherit"
-                            startIcon={<Refresh sx={{ fontSize: 40 }} />}
-                            onClick={loadData}
-                            disabled={loading}
-                            sx={{ fontSize: 20, fontWeight: 400 }}
-                        >
-                            {loading ? <CircularProgress size={20} color="inherit" /> : 'Refresh'}
-                        </Button>
+                        {/* Right: Controls (Refresh, Export) */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Button
+                                variant="contained"
+                                onClick={loadData}
+                                disabled={loading}
+                                startIcon={<Refresh sx={{ fontSize: 24 }} />}
+                                sx={{
+                                    borderRadius: 3,
+                                    boxShadow: 2,
+                                    fontWeight: 700,
+                                    minWidth: 40,
+                                    px: 2,
+                                    background: 'linear-gradient(90deg, #8e24aa 0%, #1976d2 100%)',
+                                    color: 'white',
+                                    letterSpacing: 1,
+                                    textTransform: 'uppercase',
+                                    '&:hover': {
+                                        background: 'linear-gradient(90deg, #6a1b9a 0%, #1565c0 100%)',
+                                    },
+                                }}
+                            >
+                                {loading ? <CircularProgress size={20} color="inherit" /> : 'Refresh'}
+                            </Button>
+
+                            {/* Export CSV button for cleanup candidates */}
+                            {tabValue === 2 && metrics.cleanupCandidates && metrics.cleanupCandidates.length > 0 && (
+                                <Button
+                                    variant="contained"
+                                    color="success"
+                                    onClick={handleExportData}
+                                    sx={{ borderRadius: 3, boxShadow: 1, fontWeight: 600, minWidth: 40, px: 2 }}
+                                    startIcon={<Download />}
+                                >
+                                    Export CSV
+                                </Button>
+                            )}
+                        </Box>
                     </Toolbar>
+                    {/* Tabs below AppBar, sticky */}
+                    <Box sx={{ position: 'sticky', top: 72, zIndex: 1200, borderColor: 'divider', background: 'rgba(255,255,255,0.97)', boxShadow: 1 }}>
+                        <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)} textColor="inherit"
+                            sx={{ '& .MuiTab-root': { color: '#222', fontWeight: 600 }, '& .Mui-selected': { color: '#1976d2 !important' }, minHeight: 48 }}
+                        >
+                            <Tab icon={<Flag sx={{ fontSize: 24, mr: 1 }} color="info" />} label="Dashboard" iconPosition="start" />
+                            <Tab icon={<Download sx={{ fontSize: 24, mr: 1 }} color="secondary" />} label="Charts" iconPosition="start" />
+                            <Tab icon={<Warning sx={{ fontSize: 24, mr: 1 }} color="warning" />} label="Cleanup Recommendations" iconPosition="start" />
+                            <Tab icon={<AssignmentTurnedIn sx={{ fontSize: 24, mr: 1 }} color="success" />} label="Standards" iconPosition="start" />
+                        </Tabs>
+                    </Box>
                 </AppBar>
 
                 {/* Configuration Drawer */}
@@ -182,7 +233,7 @@ function App() {
                 </Drawer>
 
                 {/* Add top margin to prevent content from being hidden behind fixed AppBar */}
-                <Container maxWidth="xl" sx={{ mt: 10, mb: 2 }}>
+                <Container maxWidth="xl" sx={{ mt: 17, mb: 2 }}>
                     {!config.apiToken || !config.projectKey ? (
                         <Alert severity="warning" sx={{ mb: 2 }}>
                             Please configure your LaunchDarkly API credentials using the menu button.
@@ -191,16 +242,6 @@ function App() {
                         <>
                             {/* Tabs: Dashboard, Charts, Cleanup Recommendations */}
                             <Paper sx={{ width: '100%', mb: 2 }}>
-                                <Box sx={{ borderBottom: 0, borderColor: 'divider' }}>
-                                    <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
-                                        <Tab icon={<Flag sx={{ fontSize: 24, mr: 1 }} color="primary" />} label="Dashboard" iconPosition="start" />
-                                        <Tab icon={<Download sx={{ fontSize: 24, mr: 1 }} color="secondary" />} label="Charts" iconPosition="start" />
-                                        <Tab icon={<Warning sx={{ fontSize: 24, mr: 1 }} color="warning" />} label="Cleanup Recommendations" iconPosition="start" />
-                                        <Tab icon={<AssignmentTurnedIn sx={{ fontSize: 24, mr: 1 }} color="success" />} label="Standards" iconPosition="start" />
-                                    </Tabs>
-                                </Box>
-
-
                                 {/* Dashboard Tab: Metrics Cards */}
                                 <TabPanel value={tabValue} index={0}>
                                     <Grid container spacing={2} marginTop={2}>
@@ -226,7 +267,7 @@ function App() {
 
                                 {/* Cleanup Recommendations Tab */}
                                 <TabPanel value={tabValue} index={2}>
-                                    {/* Export CSV button for cleanup candidates */}
+                                    {/* Export CSV button for cleanup candidates
                                     {metrics.cleanupCandidates && metrics.cleanupCandidates.length > 0 && (
                                         <Box sx={{ textAlign: 'right', mb: 2 }}>
                                             <Button
@@ -246,7 +287,7 @@ function App() {
                                                 Export CSV
                                             </Button>
                                         </Box>
-                                    )}
+                                    )} */}
                                     <Grid container spacing={3}>
                                         <Grid item xs={12} md={12}>
                                             <RecommendationsTable

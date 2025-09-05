@@ -62,7 +62,7 @@ const PriorityLineChart = ({ flags }) => {
               allowDataOverflow={true}
               padding={{ left: 20, right: 20 }}
             />
-            <YAxis type="number" dataKey="y" name="Priority Score" domain={[0, 10]} label={{ value: 'Priority Score', angle: -90, position: 'insideLeft' }} />
+            <YAxis type="number" dataKey="y" name="Priority Score" ticks={[1,2,3,4,5,6,7,8,9,10]} label={{ value: 'Priority Score', angle: -90, position: 'insideLeft' }} />
             <Tooltip content={<CustomTooltip />} />
             <Line type="monotone" dataKey="y" stroke="#1976d2" strokeWidth={3} dot={{ r: 5 }} activeDot={{ r: 7 }} />
           </LineChart>
