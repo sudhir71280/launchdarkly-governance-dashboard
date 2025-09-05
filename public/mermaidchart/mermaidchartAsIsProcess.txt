@@ -1,0 +1,15 @@
+---
+config:
+  layout: dagre
+---
+flowchart LR
+    Start["Start"] --> CreateFlag["Flag Created"] -->Code["Consuming the Flags <br> in code"]--> End["End"]
+     
+    Start:::start
+    CreateFlag:::process
+    Code:::process
+    End:::'end'
+
+    classDef start fill:#5A9BD4,stroke:#333,stroke-width:2px,color:#fff,font-weight:bold
+    classDef 'end' fill:#70AD47,stroke:#333,stroke-width:2px,color:#fff,font-weight:bold
+    classDef process fill:#A9D08E,stroke:#333,stroke-width:2px,color:#000
