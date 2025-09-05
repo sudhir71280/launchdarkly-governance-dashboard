@@ -31,7 +31,7 @@ const FlagGovernanceStandards = () => (
         </Box>
         {/* Show the chart image directly on the page */}
         <Box sx={{ mt: 3, textAlign: 'center' }}>
-            <img src="/mermaidchart/mermaidChartHorizontal.png" alt="Flag Lifecycle Chart" height="100%" width="98%" style={{ borderRadius: 10, boxShadow: '0 2px 12px rgba(0,0,0,0.12)' }} />
+            <img src="/mermaidchart/mermaidChartHorizontalToBe.png" alt="Flag Lifecycle Chart" height="100%" width="98%" style={{ borderRadius: 10, boxShadow: '0 2px 12px rgba(0,0,0,0.12)' }} />
         </Box>
     </Box>
 );

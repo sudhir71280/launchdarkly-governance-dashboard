@@ -3,7 +3,7 @@ import React from 'react';
 // DashboardCards: Displays summary cards for flag metrics
 // ---------------------------------------------
 import { Grid, Card, CardContent, Typography, Box, LinearProgress, Tooltip, styled } from '@mui/material';
-import { Flag, Archive, Warning, Schedule, } from '@mui/icons-material';
+import { Flag, Archive, Warning, } from '@mui/icons-material';
 
 const ModernTooltip = styled(({ className, ...props }) => (
     <Tooltip {...props} classes={{ popper: className }} />
@@ -68,8 +68,6 @@ const DashboardCards = ({ metrics, description }) => {
     // Calculate percentages for progress bars
     const archivedCount = metrics.lifecycleStages?.Archived || 0;
     const totalActive = metrics.totalFlags - archivedCount;
-    const tempPercentage = totalActive > 0 ? ((metrics.temporaryFlags || 0) / totalActive) * 100 : 0;
-    const permanentPercentage = totalActive > 0 ? ((metrics.permanentFlags || 0) / totalActive) * 100 : 0;
     const readyToArchivePercentage = totalActive > 0 ? ((metrics.lifecycleStages?.['Ready to Archive'] || 0) / totalActive) * 100 : 0;
     const readyToReviewPercentage = totalActive > 0 ? ((metrics.lifecycleStages?.['Ready for Review'] || 0) / totalActive) * 100 : 0;
     const liveFlagsPercentage = totalActive > 0 ? ((metrics.lifecycleStages?.Live || 0) / totalActive) * 100 : 0;
@@ -88,7 +86,7 @@ const DashboardCards = ({ metrics, description }) => {
             )}
             {/* Presentation View: All metrics in a single responsive row */}
             <Grid container spacing={3} sx={{ mb: 3 }}>
-                <Grid item xs={12} sm={6} md={6}>
+                <Grid item xs={12} sm={12} md={12}>
                     <MetricCard
                         title="Total Flags"
                         value={metrics.totalFlags}
@@ -97,30 +95,20 @@ const DashboardCards = ({ metrics, description }) => {
                         description="Count of all flags in the system."
                     />
                 </Grid>
-                <Grid item xs={12} sm={6} md={6}>
+            </Grid>
+            {/* Row 2 */}
+            <Grid container spacing={3} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={4} md={4}>
                     <MetricCard
                         title="Live Flags"
                         value={metrics.lifecycleStages?.Live || 0}
                         icon={<Flag />}
-                        color="info"
+                        color="success"
                         progress={liveFlagsPercentage}
                         description="Flags created within the past 30 days."
                     />
                 </Grid>
-            </Grid>
-            {/* Row 2 */}
-            <Grid container spacing={3} sx={{ mb: 3 }}>
-                <Grid item xs={12} sm={6} md={6}>
-                    <MetricCard
-                        title="Ready to Archive"
-                        value={metrics.lifecycleStages?.['Ready to Archive'] || 0}
-                        icon={<Archive />}
-                        color="error" // red
-                        progress={readyToArchivePercentage}
-                        description="Flags tagged as ‘Ready to Archive’"
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={6}>
+                <Grid item xs={12} sm={4} md={4}>
                     <MetricCard
                         title="Ready to Review"
                         value={metrics.lifecycleStages?.['Ready for Review'] || 0}
@@ -128,6 +116,17 @@ const DashboardCards = ({ metrics, description }) => {
                         color="warning" // yellow
                         progress={readyToReviewPercentage}
                         description="Temporary flags (age >30 days)."
+                    />
+                </Grid>
+
+                <Grid item xs={12} sm={4} md={4}>
+                    <MetricCard
+                        title="Ready to Archive"
+                        value={metrics.lifecycleStages?.['Ready to Archive'] || 0}
+                        icon={<Archive />}
+                        color="error" // red
+                        progress={readyToArchivePercentage}
+                        description="Flags tagged as ‘Ready to Archive’"
                     />
                 </Grid>
             </Grid>

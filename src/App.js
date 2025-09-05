@@ -1,10 +1,11 @@
+import { CircularProgress } from '@mui/material';
 // ------------------------------
 // LaunchDarkly Governance Dashboard
 // Main App Component
 // ------------------------------
 
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider, createTheme, CssBaseline, Box, Container, Grid, Paper, Typography, AppBar, Toolbar, IconButton, Drawer, Button, Alert, Tab, Tabs, CircularProgress } from '@mui/material';
+import { ThemeProvider, createTheme, CssBaseline, Box, Container, Grid, Paper, Typography, AppBar, Toolbar, IconButton, Drawer, Button, Alert, Tab, Tabs } from '@mui/material';
 import { Flag, Menu, Download, AssignmentTurnedIn, Warning, Refresh } from '@mui/icons-material';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 
