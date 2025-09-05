@@ -1,4 +1,3 @@
-import { CircularProgress } from '@mui/material';
 // ------------------------------
 // LaunchDarkly Governance Dashboard
 // Main App Component
