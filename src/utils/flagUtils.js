@@ -2,14 +2,16 @@
 // Utility functions for flag analysis, lifecycle, priority, alerts, and CSV export
 
 export function analyzeFlags(flags) {
-    const currentTime = new Date();
-    const analyzedFlags = [];
+        const currentTime = new Date();
+        const analyzedFlags = [];
     const metrics = {
         totalFlags: flags.length,
         ageDistribution: { '0-30': 0, '31-90': 0, '91-180': 0, '180+': 0 },
         lifecycleStages: {
             'Ready to Archive': 0,
             'Ready for Review': 0,
+            'Archived': 0,
+            'Live': 0,
         },
         cleanupCandidates: [],
     };
@@ -41,19 +43,18 @@ export function analyzeFlags(flags) {
             metrics.ageDistribution['180+']++;
         }
 
-        // Only count Ready to Archive and Ready for Review lifecycle stages
-        if (lifecycleStage === 'Ready to Archive' || lifecycleStage === 'Ready for Review' || lifecycleStage === 'Live') {
+        // Count all relevant lifecycle stages
+        if (lifecycleStage === 'Ready to Archive' || lifecycleStage === 'Ready for Review' || lifecycleStage === 'Live' || lifecycleStage === 'Archived') {
             metrics.lifecycleStages[lifecycleStage] = (metrics.lifecycleStages[lifecycleStage] || 0) + 1;
         }
 
         // --- Cleanup Candidate Logic ---
         // A flag is a cleanup candidate if:
-        //   - Its lifecycleStage is 'Ready to Archive' (case-insensitive, locale-invariant)
-        //   - OR its lifecycleStage is 'Ready for Review' (case-insensitive, locale-invariant)
-        // This ensures we catch both explicit cleanup stages.
+        //   - Its lifecycleStage is 'Ready to Archive', 'Ready for Review', or 'Archived' (case-insensitive, locale-invariant)
         const isReadyToArchive = typeof lifecycleStage === 'string' && lifecycleStage.trim().localeCompare('Ready to Archive', undefined, { sensitivity: 'base' }) === 0;
         const isReadyForReview = typeof lifecycleStage === 'string' && lifecycleStage.trim().localeCompare('Ready for Review', undefined, { sensitivity: 'base' }) === 0;
-        if (isReadyToArchive || isReadyForReview) {
+        const isArchived = typeof lifecycleStage === 'string' && lifecycleStage.trim().localeCompare('Archived', undefined, { sensitivity: 'base' }) === 0;
+        if (isReadyToArchive || isReadyForReview || isArchived) {
             // Add to cleanup candidates list for table display
             metrics.cleanupCandidates.push(analyzedFlag);
         }

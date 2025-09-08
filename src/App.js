@@ -90,7 +90,7 @@ function App() {
 
         setLoading(true);
         try {
-            const data = await launchDarklyService.fetchFlags(true);
+            const data = await launchDarklyService.fetchFlags({ includeArchived: false });
             const analyzedData = analyzeFlags(data.items || []);
 
             setFlagsData(analyzedData.flags);
@@ -214,7 +214,7 @@ function App() {
                             <Tab icon={<Flag sx={{ fontSize: 24, mr: 1 }} color="info" />} label="Dashboard" iconPosition="start" />
                             <Tab icon={<Download sx={{ fontSize: 24, mr: 1 }} color="secondary" />} label="Charts" iconPosition="start" />
                             <Tab icon={<Warning sx={{ fontSize: 24, mr: 1 }} color="warning" />} label="Cleanup Recommendations" iconPosition="start" />
-                            <Tab icon={<AssignmentTurnedIn sx={{ fontSize: 24, mr: 1 }} color="success" />} label="Standards" iconPosition="start" />
+                            <Tab icon={<AssignmentTurnedIn sx={{ fontSize: 24, mr: 1 }} color="success" />} label="Overview" iconPosition="start" />
                         </Tabs>
                     </Box>
                 </AppBar>
