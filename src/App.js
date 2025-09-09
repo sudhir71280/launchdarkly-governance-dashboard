@@ -21,6 +21,7 @@ import { LaunchDarklyService } from './services/LaunchDarklyService';
 
 import './styles/App.css';
 import { analyzeFlags, exportCleanupCandidatesToCSV } from './utils/flagUtils';
+import { launchdarklyConfig } from './config/launchdarklyConfig';
 
 // Theme configuration for Material-UI
 const theme = createTheme({
@@ -90,7 +91,7 @@ function App() {
 
         setLoading(true);
         try {
-            const data = await launchDarklyService.fetchFlags({ includeArchived: true });
+            const data = await launchDarklyService.fetchFlags({ includeArchived: launchdarklyConfig.includeArchived });
             const analyzedData = analyzeFlags(data.items || []);
 
             setFlagsData(analyzedData.flags);

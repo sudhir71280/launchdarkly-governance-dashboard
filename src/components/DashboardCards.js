@@ -4,6 +4,7 @@ import React from 'react';
 // ---------------------------------------------
 import { Grid, Card, CardContent, Typography, Box, LinearProgress, Tooltip, styled } from '@mui/material';
 import { Flag, Archive, Warning, } from '@mui/icons-material';
+import { launchdarklyConfig } from '../config/launchdarklyConfig';
 
 const ModernTooltip = styled(({ className, ...props }) => (
     <Tooltip {...props} classes={{ popper: className }} />
@@ -131,16 +132,18 @@ const DashboardCards = ({ metrics, description }) => {
                     />
                 </Grid>
 
-                <Grid item xs={12} sm={4} md={3}>
-                    <MetricCard
-                        title="Archived"
-                        value={metrics.lifecycleStages?.['Archived'] || 0}
-                        icon={<Archive />}
-                        color="error" // red
-                        progress={archivedPercentage}
-                        description="Flags marked as ‘Archived’"
-                    />
-                </Grid>
+                {launchdarklyConfig.includeArchived && (
+                    <Grid item xs={12} sm={4} md={3}>
+                        <MetricCard
+                            title="Archived"
+                            value={metrics.lifecycleStages?.['Archived'] || 0}
+                            icon={<Archive />}
+                            color="error" // red
+                            progress={archivedPercentage}
+                            description="Flags marked as ‘Archived’"
+                        />
+                    </Grid>
+                )}
             </Grid>
         </>
     );
