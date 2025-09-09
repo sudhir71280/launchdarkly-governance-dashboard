@@ -71,6 +71,7 @@ const DashboardCards = ({ metrics, description }) => {
     const readyToArchivePercentage = totalActive > 0 ? ((metrics.lifecycleStages?.['Ready to Archive'] || 0) / totalActive) * 100 : 0;
     const readyToReviewPercentage = totalActive > 0 ? ((metrics.lifecycleStages?.['Ready for Review'] || 0) / totalActive) * 100 : 0;
     const liveFlagsPercentage = totalActive > 0 ? ((metrics.lifecycleStages?.Live || 0) / totalActive) * 100 : 0;
+    const archivedPercentage = totalActive > 0 ? ((metrics.lifecycleStages?.Archived || 0) / totalActive) * 100 : 0;
     return (
         <>
             {/* Executive Description Section */}
@@ -98,7 +99,7 @@ const DashboardCards = ({ metrics, description }) => {
             </Grid>
             {/* Row 2 */}
             <Grid container spacing={3} sx={{ mb: 3 }}>
-                <Grid item xs={12} sm={4} md={4}>
+                <Grid item xs={12} sm={4} md={3}>
                     <MetricCard
                         title="Live Flags"
                         value={metrics.lifecycleStages?.Live || 0}
@@ -108,7 +109,7 @@ const DashboardCards = ({ metrics, description }) => {
                         description="Flags created within the past 30 days."
                     />
                 </Grid>
-                <Grid item xs={12} sm={4} md={4}>
+                <Grid item xs={12} sm={4} md={3}>
                     <MetricCard
                         title="Ready to Review"
                         value={metrics.lifecycleStages?.['Ready for Review'] || 0}
@@ -119,7 +120,7 @@ const DashboardCards = ({ metrics, description }) => {
                     />
                 </Grid>
 
-                <Grid item xs={12} sm={4} md={4}>
+                <Grid item xs={12} sm={4} md={3}>
                     <MetricCard
                         title="Ready to Archive"
                         value={metrics.lifecycleStages?.['Ready to Archive'] || 0}
@@ -127,6 +128,17 @@ const DashboardCards = ({ metrics, description }) => {
                         color="error" // red
                         progress={readyToArchivePercentage}
                         description="Flags tagged as ‘Ready to Archive’"
+                    />
+                </Grid>
+
+                <Grid item xs={12} sm={4} md={3}>
+                    <MetricCard
+                        title="Archived"
+                        value={metrics.lifecycleStages?.['Archived'] || 0}
+                        icon={<Archive />}
+                        color="error" // red
+                        progress={archivedPercentage}
+                        description="Flags marked as ‘Archived’"
                     />
                 </Grid>
             </Grid>

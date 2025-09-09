@@ -90,7 +90,7 @@ function App() {
 
         setLoading(true);
         try {
-            const data = await launchDarklyService.fetchFlags({ includeArchived: false });
+            const data = await launchDarklyService.fetchFlags({ includeArchived: true });
             const analyzedData = analyzeFlags(data.items || []);
 
             setFlagsData(analyzedData.flags);
@@ -267,34 +267,13 @@ function App() {
 
                                 {/* Cleanup Recommendations Tab */}
                                 <TabPanel value={tabValue} index={2}>
-                                    {/* Export CSV button for cleanup candidates
-                                    {metrics.cleanupCandidates && metrics.cleanupCandidates.length > 0 && (
-                                        <Box sx={{ textAlign: 'right', mb: 2 }}>
-                                            <Button
-                                                startIcon={<Download />}
-                                                onClick={handleExportData}
-                                                size="medium"
-                                                sx={{
-                                                    background: 'linear-gradient(90deg, #1976d2 0%, #2196f3 100%)',
-                                                    color: 'white',
-                                                    fontWeight: 600,
-                                                    boxShadow: '0 2px 8px rgba(25, 118, 210, 0.10)',
-                                                    '&:hover': {
-                                                        background: 'linear-gradient(90deg, #1565c0 0%, #1976d2 100%)',
-                                                    },
-                                                }}
-                                            >
-                                                Export CSV
-                                            </Button>
-                                        </Box>
-                                    )} */}
                                     <Grid container spacing={3}>
                                         <Grid item xs={12} md={12}>
                                             <RecommendationsTable
                                                 flags={flagsData || []}
                                                 loading={loading}
                                                 hideAttentionMessage={true}
-                                            />
+                                                                                            />
                                         </Grid>
                                     </Grid>
                                 </TabPanel>

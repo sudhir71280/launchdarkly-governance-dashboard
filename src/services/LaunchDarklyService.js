@@ -21,25 +21,46 @@ export class LaunchDarklyService {
     }
 
     async fetchFlags({ includeArchived = false } = {}) {
-        // Fetches all flags for the given project, paginated. Optionally includes archived flags.
+        // Fetches all flags for the given project, paginated. If includeArchived is true, fetch both active and archived flags and merge them.
         try {
             let allFlags = [];
-            let offset = 0;
-            let totalCount = null;
             const limit = 100;
-            const archivedParam = includeArchived ? '&archived=true' : '';
-            do {
-                const response = await this.client.get(`/flags/${this.projectKey}?limit=${limit}&offset=${offset}${archivedParam}`);
-                const data = response.data;
-                if (data.items) {
-                    allFlags = allFlags.concat(data.items);
-                }
-                totalCount = data.totalCount || (data.items ? data.items.length : 0);
-                offset += limit;
-                // If API does not return totalCount, break when less than limit returned
-                if (!data.items || data.items.length < limit) break;
-            } while (allFlags.length < totalCount && allFlags.length < 500);
-            return { items: allFlags };
+            // Helper to fetch flags for a given archived param
+            const fetchByArchived = async (archivedValue) => {
+                let flags = [];
+                let offset = 0;
+                let totalCount = null;
+                do {
+                    const response = await this.client.get(`/flags/${this.projectKey}?limit=${limit}&offset=${offset}&archived=${archivedValue}`);
+                    const data = response.data;
+                    if (data.items) {
+                        flags = flags.concat(data.items);
+                    }
+                    totalCount = data.totalCount || (data.items ? data.items.length : 0);
+                    offset += limit;
+                    if (!data.items || data.items.length < limit) break;
+                } while (flags.length < totalCount && flags.length < 500);
+                return flags;
+            };
+
+            if (includeArchived) {
+                // Fetch both active and archived flags, then merge
+                const [activeFlags, archivedFlags] = await Promise.all([
+                    fetchByArchived(false),
+                    fetchByArchived(true)
+                ]);
+                // Merge and deduplicate by flag key
+                const all = [...activeFlags, ...archivedFlags];
+                const deduped = Object.values(all.reduce((acc, flag) => {
+                    acc[flag.key] = flag;
+                    return acc;
+                }, {}));
+                return { items: deduped };
+            } else {
+                // Only fetch active flags
+                const activeFlags = await fetchByArchived(false);
+                return { items: activeFlags };
+            }
         } catch (error) {
             throw new Error(`Failed to fetch flags: ${error.response?.data?.message || error.message}`);
         }
