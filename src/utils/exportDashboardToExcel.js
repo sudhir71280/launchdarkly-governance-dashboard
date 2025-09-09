@@ -54,9 +54,9 @@ export function exportDashboardToExcel(metrics, flags) {
     const wsDashboard = XLSX.utils.aoa_to_sheet(dashboardData);
     const wsAgewise = XLSX.utils.aoa_to_sheet(agewiseData);
     const wsAllFlags = XLSX.utils.aoa_to_sheet(allFlagsData);
-    XLSX.utils.book_append_sheet(wb, wsDashboard, 'Dashboard Counts');
-    XLSX.utils.book_append_sheet(wb, wsAgewise, 'Agewise Flags Count');
-    XLSX.utils.book_append_sheet(wb, wsAllFlags, 'All Flags Data');
+    XLSX.utils.book_append_sheet(wb, wsDashboard, 'Dashboard');
+    XLSX.utils.book_append_sheet(wb, wsAgewise, 'Flag Age Distribution');
+    XLSX.utils.book_append_sheet(wb, wsAllFlags, 'All Flags');
 
     // Export to file
     XLSX.writeFile(wb, `flag_dashboard_report_${new Date().toISOString().split('T')[0]}.xlsx`);
