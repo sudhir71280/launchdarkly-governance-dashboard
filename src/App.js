@@ -20,7 +20,9 @@ import { CircularProgress } from '@mui/material';
 import { LaunchDarklyService } from './services/LaunchDarklyService';
 
 import './styles/App.css';
-import { analyzeFlags, exportCleanupCandidatesToCSV } from './utils/flagUtils';
+import { analyzeFlags } from './utils/flagUtils';
+import { exportDashboardAndCleanupToCSV } from './utils/exportDashboardAndCleanupToCSV';
+import { exportDashboardToExcel } from './utils/exportDashboardToExcel';
 import { launchdarklyConfig } from './config/launchdarklyConfig';
 
 // Theme configuration for Material-UI
@@ -118,17 +120,22 @@ function App() {
         localStorage.setItem('launchdarkly_project_key', newConfig.projectKey);
     };
 
-    // Exports cleanup candidates to CSV file
+    // Exports dashboard metrics and cleanup candidates to CSV file
     const handleExportData = () => {
-        const csvContent = exportCleanupCandidatesToCSV(metrics.cleanupCandidates || []);
+        const csvContent = exportDashboardAndCleanupToCSV(metrics, metrics.cleanupCandidates || []);
         // Download CSV
         const blob = new Blob([csvContent], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `flag_cleanup_report_${new Date().toISOString().split('T')[0]}.csv`;
+        link.download = `flag_dashboard_and_cleanup_report_${new Date().toISOString().split('T')[0]}.csv`;
         link.click();
         window.URL.revokeObjectURL(url);
+    };
+
+    // Exports dashboard, agewise, and all flags data to Excel file
+    const handleExportExcel = () => {
+        exportDashboardToExcel(metrics, flagsData || []);
     };
 
     return (
@@ -193,17 +200,28 @@ function App() {
                                 {loading ? <CircularProgress size={20} color="inherit" /> : 'Refresh'}
                             </Button>
 
-                            {/* Export CSV button for cleanup candidates */}
+                            {/* Export CSV and Excel buttons for cleanup candidates */}
                             {tabValue === 2 && metrics.cleanupCandidates && metrics.cleanupCandidates.length > 0 && (
-                                <Button
-                                    variant="contained"
-                                    color="success"
-                                    onClick={handleExportData}
-                                    sx={{ borderRadius: 3, boxShadow: 1, fontWeight: 600, minWidth: 40, px: 2 }}
-                                    startIcon={<Download />}
-                                >
-                                    Export CSV
-                                </Button>
+                                <>
+                                    <Button
+                                        variant="contained"
+                                        color="success"
+                                        onClick={handleExportData}
+                                        sx={{ borderRadius: 3, boxShadow: 1, fontWeight: 600, minWidth: 40, px: 2 }}
+                                        startIcon={<Download />}
+                                    >
+                                        Export CSV
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        color="info"
+                                        onClick={handleExportExcel}
+                                        sx={{ borderRadius: 3, boxShadow: 1, fontWeight: 600, minWidth: 40, px: 2, ml: 1 }}
+                                        startIcon={<Download />}
+                                    >
+                                        Export Excel
+                                    </Button>
+                                </>
                             )}
                         </Box>
                     </Toolbar>
