@@ -66,8 +66,7 @@ const MetricCard = ({ title, value, icon, color = 'primary', progress, descripti
 
 const DashboardCards = ({ metrics, description, includeArchived }) => {
     // Calculate percentages for progress bars
-    const archivedCount = metrics.lifecycleStages?.Archived || 0;
-    const totalActive = metrics.totalFlags - archivedCount;
+    const totalActive = metrics.totalFlags;
     const readyToArchivePercentage = totalActive > 0 ? ((metrics.lifecycleStages?.['Ready to Archive'] || 0) / totalActive) * 100 : 0;
     const readyToReviewPercentage = totalActive > 0 ? ((metrics.lifecycleStages?.['Ready for Review'] || 0) / totalActive) * 100 : 0;
     const liveFlagsPercentage = totalActive > 0 ? ((metrics.lifecycleStages?.Live || 0) / totalActive) * 100 : 0;

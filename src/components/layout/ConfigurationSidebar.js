@@ -35,20 +35,33 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
         // Map to { label, value } for dropdown
         const options = projects.map(p => ({ label: p.name, value: p.key }));
         setProjectOptions(options);
-        // If current projectKey is not in options, reset to blank or first available
-        if (localConfig.projectKey && !options.some(opt => opt.value === localConfig.projectKey)) {
-          setLocalConfig(lc => ({ ...lc, projectKey: options.length > 0 ? options[0].value : '' }));
-        }
+        setLocalConfig(lc => {
+          // If no options, force projectKey to ''
+          if (options.length === 0) {
+            return { ...lc, projectKey: '' };
+          }
+          if (!lc.projectKey || !options.some(opt => opt.value === lc.projectKey)) {
+            return { ...lc, projectKey: options[0].value };
+          }
+          return lc;
+        });
       } catch (err) {
         // fallback to config if API fails
-        setProjectOptions(launchdarklyConfig.projectKeys || []);
-        if (localConfig.projectKey && !(launchdarklyConfig.projectKeys || []).some(opt => opt.value === localConfig.projectKey)) {
-          setLocalConfig(lc => ({ ...lc, projectKey: '' }));
-        }
+        const fallbackOptions = launchdarklyConfig.projectKeys || [];
+        setProjectOptions(fallbackOptions);
+        setLocalConfig(lc => {
+          if (fallbackOptions.length === 0) {
+            return { ...lc, projectKey: '' };
+          }
+          if (!lc.projectKey || !fallbackOptions.some(opt => opt.value === lc.projectKey)) {
+            return { ...lc, projectKey: fallbackOptions[0].value };
+          }
+          return lc;
+        });
       }
     };
     fetchProjects();
-  }, [localConfig.apiToken, localConfig.projectKey]);
+  }, [localConfig.apiToken]);
 
   const handleSave = () => {
     // Validate and save configuration
@@ -97,7 +110,7 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
         <FormControl fullWidth margin="normal" size="small" error={!!errors.projectKey}>
           <Typography variant="body2" sx={{ mb: 1 }}>Project Key</Typography>
           <Select
-            value={localConfig.projectKey}
+            value={projectOptions.length === 0 ? '' : localConfig.projectKey}
             onChange={(e) => setLocalConfig({ ...localConfig, projectKey: e.target.value })}
             displayEmpty
           >
