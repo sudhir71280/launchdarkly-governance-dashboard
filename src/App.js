@@ -22,7 +22,6 @@ import { LaunchDarklyService } from './services/LaunchDarklyService';
 import './styles/App.css';
 import { analyzeFlags } from './utils/flagUtils';
 import { exportDashboardToExcel } from './utils/exportDashboardToExcel';
-import { launchdarklyConfig } from './config/launchdarklyConfig';
 
 // Theme configuration for Material-UI
 const theme = createTheme({
@@ -77,11 +76,11 @@ function App() {
     // Data Fetching & Effects
     // ------------------------------
     useEffect(() => {
-        // Fetch data when API token or project key changes
+        // Fetch data when API token, project key, or includeArchived changes
         if (config.apiToken && config.projectKey) {
             loadData();
         }
-    }, [config.apiToken, config.projectKey]);
+    }, [config.apiToken, config.projectKey, config.includeArchived]);
 
     // Fetches flag data and updates state
     const loadData = async () => {
@@ -92,7 +91,7 @@ function App() {
 
         setLoading(true);
         try {
-            const data = await launchDarklyService.fetchFlags({ includeArchived: launchdarklyConfig.includeArchived });
+            const data = await launchDarklyService.fetchFlags({ includeArchived: config.includeArchived });
             const analyzedData = analyzeFlags(data.items || []);
 
             setFlagsData(analyzedData.flags);
@@ -121,7 +120,7 @@ function App() {
 
     // Exports dashboard, agewise, and all flags data to Excel file
     const handleExportExcel = () => {
-        exportDashboardToExcel(metrics, flagsData || []);
+        exportDashboardToExcel(metrics, flagsData || [], config.includeArchived);
     };
 
     return (
@@ -242,7 +241,7 @@ function App() {
                                 <TabPanel value={tabValue} index={0}>
                                     <Grid container spacing={2} marginTop={2}>
                                         <Grid item xs={12} md={6}></Grid>
-                                        <DashboardCards metrics={metrics || {}} />
+                                        <DashboardCards metrics={metrics || {}} includeArchived={config.includeArchived} />
                                     </Grid>
                                 </TabPanel>
 

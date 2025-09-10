@@ -4,7 +4,6 @@ import React from 'react';
 // ---------------------------------------------
 import { Grid, Card, CardContent, Typography, Box, LinearProgress, Tooltip, styled } from '@mui/material';
 import { Flag, Archive, Warning, } from '@mui/icons-material';
-import { launchdarklyConfig } from '../config/launchdarklyConfig';
 
 const ModernTooltip = styled(({ className, ...props }) => (
     <Tooltip {...props} classes={{ popper: className }} />
@@ -65,7 +64,7 @@ const MetricCard = ({ title, value, icon, color = 'primary', progress, descripti
     );
 };
 
-const DashboardCards = ({ metrics, description }) => {
+const DashboardCards = ({ metrics, description, includeArchived }) => {
     // Calculate percentages for progress bars
     const archivedCount = metrics.lifecycleStages?.Archived || 0;
     const totalActive = metrics.totalFlags - archivedCount;
@@ -132,7 +131,7 @@ const DashboardCards = ({ metrics, description }) => {
                     />
                 </Grid>
 
-                {launchdarklyConfig.includeArchived && (
+                {includeArchived && (
                     <Grid item xs={12} sm={4} md={3}>
                         <MetricCard
                             title="Archived"
