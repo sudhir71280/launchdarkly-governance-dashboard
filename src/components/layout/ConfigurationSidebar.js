@@ -16,6 +16,13 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
     projectKey: config.projectKey || '',
     includeArchived: config.includeArchived !== undefined ? config.includeArchived : launchdarklyConfig.includeArchived,
   });
+
+  // Persist includeArchived to localStorage when it changes
+  useEffect(() => {
+    if (localConfig.includeArchived !== undefined) {
+      localStorage.setItem('includeArchived', JSON.stringify(localConfig.includeArchived));
+    }
+  }, [localConfig.includeArchived]);
   const [errors, setErrors] = useState({});
 
   const [projectOptions, setProjectOptions] = useState(launchdarklyConfig.projectKeys || []);
@@ -41,7 +48,7 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
       }
     };
     fetchProjects();
-  }, [localConfig.apiToken]);
+  }, [localConfig.apiToken, localConfig.projectKey]);
 
   const handleSave = () => {
     // Validate and save configuration
@@ -117,7 +124,7 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
               color="primary"
             />
           }
-          label="Include Archived Flags in Dashboard"
+          label="Include Archived Flags"
         />
       </Paper>
       {/* Actions */}

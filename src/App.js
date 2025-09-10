@@ -64,6 +64,9 @@ function App() {
     const [config, setConfig] = useState({
         apiToken: localStorage.getItem('launchdarkly_api_token') || '',
         projectKey: localStorage.getItem('launchdarkly_project_key') || '',
+        includeArchived: localStorage.getItem('includeArchived') !== null
+            ? JSON.parse(localStorage.getItem('includeArchived'))
+            : false,
     });
 
     // Snackbar for notifications
