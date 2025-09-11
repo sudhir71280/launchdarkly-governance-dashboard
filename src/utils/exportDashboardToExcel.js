@@ -9,7 +9,7 @@ export function exportDashboardToExcel(metrics, flags, includeArchived) {
         ['Total Flags', metrics.totalFlags || 0],
         ['Live Flags', metrics.lifecycleStages?.Live || 0],
         ['Ready to Review', metrics.lifecycleStages?.['Ready for Review'] || 0],
-        ['Ready to Archive', metrics.lifecycleStages?.['Ready for Archive'] || 0],
+        ['Ready to Archive', metrics.lifecycleStages?.['Ready to Archive'] || 0],
     ];
 
     if (includeArchived && metrics.lifecycleStages?.Archived !== undefined) {
