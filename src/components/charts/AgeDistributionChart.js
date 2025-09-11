@@ -6,16 +6,23 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Paper, Typography, Box } from '@mui/material';
 
 const AgeDistributionChart = ({ data }) => {
-  // Prepare chart data from age distribution object
-  const chartData = Object.entries(data || {}).map(([name, value]) => ({
-    name,
-    value,
-  }));
-
+  // If passed an array, treat as flags array; else fallback to old behavior
+  let ageDistribution = { '0-30': 0, '31-90': 0, '91-180': 0, '180+': 0 };
+  if (Array.isArray(data)) {
+    const now = new Date();
+    data.filter(f => !f.archived).forEach(flag => {
+      const ageDays = Math.floor((now - new Date(flag.creationDate)) / (1000 * 60 * 60 * 24));
+      if (ageDays <= 30) ageDistribution['0-30']++;
+      else if (ageDays <= 90) ageDistribution['31-90']++;
+      else if (ageDays <= 180) ageDistribution['91-180']++;
+      else ageDistribution['180+']++;
+    });
+  } else if (data && typeof data === 'object') {
+    ageDistribution = data;
+  }
+  const chartData = Object.entries(ageDistribution).map(([name, value]) => ({ name, value }));
   if (chartData.length === 0 || chartData.every(item => item.value === 0)) {
-    // Show message if no data is available
     return (
-      // Render bar chart for flag age distribution
       <Paper sx={{ p: 3, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography variant="h6" color="text.secondary">
           No data available
@@ -23,7 +30,6 @@ const AgeDistributionChart = ({ data }) => {
       </Paper>
     );
   }
-
   return (
     <Paper sx={{ p: 3, height: 400 }}>
       <Typography variant="h6" gutterBottom>

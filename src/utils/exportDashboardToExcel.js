@@ -38,7 +38,8 @@ export function exportDashboardToExcel(metrics, flags, includeArchived) {
         'Archived',
         'Creation Date',
     ];
-    const flagRows = flags.map(flag => [
+    // Exclude archived flags from export
+    const flagRows = flags.filter(f => !f.archived).map(flag => [
         flag.name,
         flag.key,
         `${flag._maintainer?.firstName || ''} ${flag._maintainer?.lastName || ''}`.trim(),

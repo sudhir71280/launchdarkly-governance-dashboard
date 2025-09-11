@@ -7,15 +7,13 @@ import { Paper, Typography, Box } from '@mui/material';
 import { format, parseISO } from 'date-fns';
 
 const TimelineChart = ({ flags }) => {
-  // Group flags by creation month for timeline chart
-  // Group flags by creation month
+  // Only use non-archived flags
+  const nonArchivedFlags = Array.isArray(flags) ? flags.filter(f => !f.archived) : [];
   const monthlyData = {};
 
-  flags.forEach(flag => {
-    // Extract month from flag creation date
+  nonArchivedFlags.forEach(flag => {
     const date = new Date(flag.creationDate);
     const monthKey = format(date, 'yyyy-MM');
-
     if (!monthlyData[monthKey]) {
       monthlyData[monthKey] = { month: monthKey, count: 0 };
     }

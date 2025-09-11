@@ -11,7 +11,6 @@ import { SnackbarProvider, useSnackbar } from 'notistack';
 // Import custom components
 import DashboardCards from './components/DashboardCards';
 import AgeDistributionChart from './components/charts/AgeDistributionChart';
-import PriorityBubbleChart from './components/charts/PriorityScatterChart';
 import TimelineChart from './components/charts/TimelineChart';
 import RecommendationsTable from './components/tables/RecommendationsTable';
 import ConfigurationSidebar from './components/layout/ConfigurationSidebar';
@@ -109,8 +108,6 @@ function App() {
             setLoading(false);
         }
     };
-
-
 
 
     // Updates configuration and saves to localStorage
@@ -251,14 +248,11 @@ function App() {
                                 {/* Charts Tab (restored) */}
                                 <TabPanel value={tabValue} index={1}>
                                     <Grid container spacing={2}>
-                                        <Grid item xs={12} md={6}>
-                                            <AgeDistributionChart data={metrics.ageDistribution} />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
+                                        <Grid item xs={12} md={12}>
                                             <TimelineChart flags={flagsData} />
                                         </Grid>
                                         <Grid item xs={12} md={12}>
-                                            <PriorityBubbleChart flags={flagsData} />
+                                            <AgeDistributionChart data={flagsData} />
                                         </Grid>
                                     </Grid>
                                 </TabPanel>

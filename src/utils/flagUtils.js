@@ -2,8 +2,8 @@
 // Utility functions for flag analysis, lifecycle, priority, alerts, and CSV export
 
 export function analyzeFlags(flags) {
-        const currentTime = new Date();
-        const analyzedFlags = [];
+    const currentTime = new Date();
+    const analyzedFlags = [];
     const metrics = {
         totalFlags: flags.length,
         ageDistribution: { '0-30': 0, '31-90': 0, '91-180': 0, '180+': 0 },
@@ -29,20 +29,20 @@ export function analyzeFlags(flags) {
             priorityScore,
         };
         analyzedFlags.push(analyzedFlag);
-
-        if (ageDays <= 30) {
-            metrics.ageDistribution['0-30']++;
+        if (!flag.archived) {
+            if (ageDays <= 30) {
+                metrics.ageDistribution['0-30']++;
+            }
+            else if (ageDays <= 90) {
+                metrics.ageDistribution['31-90']++;
+            }
+            else if (ageDays <= 180) {
+                metrics.ageDistribution['91-180']++;
+            }
+            else {
+                metrics.ageDistribution['180+']++;
+            }
         }
-        else if (ageDays <= 90) {
-            metrics.ageDistribution['31-90']++;
-        }
-        else if (ageDays <= 180) {
-            metrics.ageDistribution['91-180']++;
-        }
-        else {
-            metrics.ageDistribution['180+']++;
-        }
-
         // Count all relevant lifecycle stages
         if (lifecycleStage === 'Ready to Archive' || lifecycleStage === 'Ready for Review' || lifecycleStage === 'Live' || lifecycleStage === 'Archived') {
             metrics.lifecycleStages[lifecycleStage] = (metrics.lifecycleStages[lifecycleStage] || 0) + 1;
