@@ -3,7 +3,7 @@
 // Main App Component
 // ------------------------------
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ThemeProvider, createTheme, CssBaseline, Box, Container, Grid, Paper, Typography, AppBar, Toolbar, IconButton, Drawer, Button, Alert, Tab, Tabs } from '@mui/material';
 import { Flag, Menu, Download, AssignmentTurnedIn, Warning, Refresh } from '@mui/icons-material';
 import { SnackbarProvider, useSnackbar } from 'notistack';
@@ -71,21 +71,15 @@ function App() {
     // Snackbar for notifications
     const { enqueueSnackbar } = useSnackbar();
 
-    // Service instance for LaunchDarkly API
-    const launchDarklyService = new LaunchDarklyService(config.apiToken, config.projectKey);
+    // Service instance for LaunchDarkly API (memoized to prevent infinite effect loop)
+    const launchDarklyService = useMemo(
+        () => new LaunchDarklyService(config.apiToken, config.projectKey),
+        [config.apiToken, config.projectKey]
+    );
 
-    // ------------------------------
-    // Data Fetching & Effects
-    // ------------------------------
-    useEffect(() => {
-        // Fetch data when API token, project key, or includeArchived changes
-        if (config.apiToken && config.projectKey) {
-            loadData();
-        }
-    }, [config.apiToken, config.projectKey, config.includeArchived]);
 
     // Fetches flag data and updates state
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         if (!config.apiToken || !config.projectKey) {
             enqueueSnackbar('Please configure API credentials', { variant: 'warning' });
             return;
@@ -107,7 +101,17 @@ function App() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [config.apiToken, config.projectKey, config.includeArchived, enqueueSnackbar, launchDarklyService]);
+
+    // ------------------------------
+    // Data Fetching & Effects
+    // ------------------------------
+    useEffect(() => {
+        // Fetch data when API token, project key, or includeArchived changes
+        if (config.apiToken && config.projectKey) {
+            loadData();
+        }
+    }, [config.apiToken, config.projectKey, config.includeArchived, loadData]);
 
 
     // Updates configuration and saves to localStorage
