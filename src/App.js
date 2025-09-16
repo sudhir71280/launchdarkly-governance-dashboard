@@ -63,9 +63,6 @@ function App() {
     const [config, setConfig] = useState({
         apiToken: localStorage.getItem('launchdarkly_api_token') || '',
         projectKey: localStorage.getItem('launchdarkly_project_key') || '',
-        includeArchived: localStorage.getItem('includeArchived') !== null
-            ? JSON.parse(localStorage.getItem('includeArchived'))
-            : false,
     });
 
     // Snackbar for notifications
@@ -87,7 +84,7 @@ function App() {
 
         setLoading(true);
         try {
-            const data = await launchDarklyService.fetchFlags({ includeArchived: config.includeArchived });
+            const data = await launchDarklyService.fetchFlags(true);
             const analyzedData = analyzeFlags(data.items || []);
 
             setFlagsData(analyzedData.flags);
@@ -101,17 +98,17 @@ function App() {
         } finally {
             setLoading(false);
         }
-    }, [config.apiToken, config.projectKey, config.includeArchived, enqueueSnackbar, launchDarklyService]);
+    }, [config.apiToken, config.projectKey, enqueueSnackbar, launchDarklyService]);
 
     // ------------------------------
     // Data Fetching & Effects
     // ------------------------------
     useEffect(() => {
-        // Fetch data when API token, project key, or includeArchived changes
+        // Fetch data when API token, project key changes
         if (config.apiToken && config.projectKey) {
             loadData();
         }
-    }, [config.apiToken, config.projectKey, config.includeArchived, loadData]);
+    }, [config.apiToken, config.projectKey, loadData]);
 
 
     // Updates configuration and saves to localStorage
@@ -124,7 +121,7 @@ function App() {
 
     // Exports dashboard, agewise, and all flags data to Excel file
     const handleExportExcel = () => {
-        exportDashboardToExcel(metrics, flagsData || [], config.includeArchived);
+        exportDashboardToExcel(metrics, flagsData || [], true);
     };
 
     return (
@@ -245,7 +242,7 @@ function App() {
                                 <TabPanel value={tabValue} index={0}>
                                     <Grid container spacing={2} marginTop={2}>
                                         <Grid item xs={12} md={6}></Grid>
-                                        <DashboardCards metrics={metrics || {}} includeArchived={config.includeArchived} />
+                                        <DashboardCards metrics={metrics || {}} />
                                     </Grid>
                                 </TabPanel>
 

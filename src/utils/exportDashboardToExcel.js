@@ -2,7 +2,7 @@
 // Utility to export dashboard metrics, agewise counts, and all flags to a multi-sheet Excel file
 import * as XLSX from 'xlsx';
 
-export function exportDashboardToExcel(metrics, flags, includeArchived) {
+export function exportDashboardToExcel(metrics, flags, includeArchived = true) {
     // Sheet 1: Dashboard Counts
     const dashboardData = [
         ['Metric', 'Count'],
@@ -38,8 +38,8 @@ export function exportDashboardToExcel(metrics, flags, includeArchived) {
         'Archived',
         'Creation Date',
     ];
-    // Exclude archived flags from export
-    const flagRows = flags.filter(f => !f.archived).map(flag => [
+    // Include all flags in export (including archived)
+    const flagRows = flags.map(flag => [
         flag.name,
         flag.key,
         `${flag._maintainer?.firstName || ''} ${flag._maintainer?.lastName || ''}`.trim(),

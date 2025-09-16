@@ -20,7 +20,7 @@ export class LaunchDarklyService {
         });
     }
 
-    async fetchFlags({ includeArchived = false } = {}) {
+    async fetchFlags({ includeArchived = true } = {}) {
         // Fetches all flags for the given project, paginated. If includeArchived is true, fetch both active and archived flags and merge them.
         try {
             const limit = 100;

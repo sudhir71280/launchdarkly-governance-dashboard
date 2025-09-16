@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 // ---------------------------------------------
 // ConfigurationSidebar: Sidebar for dashboard settings and filters
 // ---------------------------------------------
-import { Box, Typography, Select, MenuItem, FormControl, Button, IconButton, Paper, Switch, FormControlLabel } from '@mui/material';
+import { Box, Typography, Select, MenuItem, FormControl, Button, IconButton, Paper } from '@mui/material';
 import { launchdarklyConfig } from '../../config/launchdarklyConfig';
 import LaunchDarklyService from '../../services/LaunchDarklyService';
 // Add environments to launchdarklyConfig if not present
@@ -14,15 +14,10 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
     ...config,
     apiToken: config.apiToken || 'api-8a9c5d7c-2557-46a4-bb8c-5732643a2f4c',
     projectKey: config.projectKey || '',
-    includeArchived: config.includeArchived !== undefined ? config.includeArchived : launchdarklyConfig.includeArchived,
+    includeArchived: true,
   });
 
-  // Persist includeArchived to localStorage when it changes
-  useEffect(() => {
-    if (localConfig.includeArchived !== undefined) {
-      localStorage.setItem('includeArchived', JSON.stringify(localConfig.includeArchived));
-    }
-  }, [localConfig.includeArchived]);
+  // No need to persist includeArchived, always true
   const [errors, setErrors] = useState({});
 
   const [projectOptions, setProjectOptions] = useState(launchdarklyConfig.projectKeys || []);
@@ -127,19 +122,7 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
           )}
         </FormControl>
       </Paper>
-      {/* Include Archived Toggle */}
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={!!localConfig.includeArchived}
-              onChange={e => setLocalConfig({ ...localConfig, includeArchived: e.target.checked })}
-              color="primary"
-            />
-          }
-          label="Include Archived Flags"
-        />
-      </Paper>
+      {/* Include Archived Toggle removed, always true */}
       {/* Actions */}
       <Box sx={{ display: 'flex', gap: 2 }}>
         <Button

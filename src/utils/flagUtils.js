@@ -29,20 +29,19 @@ export function analyzeFlags(flags) {
             priorityScore,
         };
         analyzedFlags.push(analyzedFlag);
-        if (!flag.archived) {
-            if (ageDays <= 30) {
-                metrics.ageDistribution['0-30']++;
-            }
-            else if (ageDays <= 90) {
-                metrics.ageDistribution['31-90']++;
-            }
-            else if (ageDays <= 180) {
-                metrics.ageDistribution['91-180']++;
-            }
-            else {
-                metrics.ageDistribution['180+']++;
-            }
+        if (ageDays <= 30) {
+            metrics.ageDistribution['0-30']++;
         }
+        else if (ageDays <= 90) {
+            metrics.ageDistribution['31-90']++;
+        }
+        else if (ageDays <= 180) {
+            metrics.ageDistribution['91-180']++;
+        }
+        else {
+            metrics.ageDistribution['180+']++;
+        }
+        
         // Count all relevant lifecycle stages
         if (lifecycleStage === 'Ready to Archive' || lifecycleStage === 'Ready for Review' || lifecycleStage === 'Live' || lifecycleStage === 'Archived') {
             metrics.lifecycleStages[lifecycleStage] = (metrics.lifecycleStages[lifecycleStage] || 0) + 1;

@@ -64,7 +64,7 @@ const MetricCard = ({ title, value, icon, color = 'primary', progress, descripti
     );
 };
 
-const DashboardCards = ({ metrics, description, includeArchived }) => {
+const DashboardCards = ({ metrics, description }) => {
     // Calculate percentages for progress bars
     const totalActive = metrics.totalFlags;
     const readyToArchivePercentage = totalActive > 0 ? ((metrics.lifecycleStages?.['Ready to Archive'] || 0) / totalActive) * 100 : 0;
@@ -130,18 +130,16 @@ const DashboardCards = ({ metrics, description, includeArchived }) => {
                     />
                 </Grid>
 
-                {includeArchived && (
-                    <Grid item xs={12} sm={4} md={3}>
-                        <MetricCard
-                            title="Archived"
-                            value={metrics.lifecycleStages?.['Archived'] || 0}
-                            icon={<Archive />}
-                            color="error" // red
-                            progress={archivedPercentage}
-                            description="Flags marked as ‘Archived’"
-                        />
-                    </Grid>
-                )}
+                <Grid item xs={12} sm={4} md={3}>
+                    <MetricCard
+                        title="Archived"
+                        value={metrics.lifecycleStages?.['Archived'] || 0}
+                        icon={<Archive />}
+                        color="error" // red
+                        progress={archivedPercentage}
+                        description="Flags marked as ‘Archived’"
+                    />
+                </Grid>
             </Grid>
         </>
     );
