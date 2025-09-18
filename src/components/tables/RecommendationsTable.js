@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 // RecommendationsTable: Table of flags needing cleanup
 // ---------------------------------------------
 import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Chip, Tooltip, Box, Avatar, TableSortLabel, } from '@mui/material';
+import { TextField } from '@mui/material';
 import FlagDetailDialog from '../FlagDetailDialog';
 // Helper to generate a color from a string
 function stringToColor(str) {
@@ -38,20 +39,28 @@ const getLifecycleColor = (stage) => {
 
 const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercentage = 0 }) => {
 
-  // State for pagination, sorting, and flag detail dialog
+  // State for pagination, sorting, flag detail dialog, and filters
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(50);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('owner');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedFlag, setSelectedFlag] = useState(null);
+  // Filter states
+  const [filterOwner, setFilterOwner] = useState('');
+  const [filterFlagName, setFilterFlagName] = useState('');
+  const [filterTag, setFilterTag] = useState('');
+  const [filterAge, setFilterAge] = useState('');
+  const [filterLifecycle, setFilterLifecycle] = useState('');
+  const [filterPriority, setFilterPriority] = useState('');
+  const [filterTemporary, setFilterTemporary] = useState('');
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+    setRowsPerPage(parseInt(event.target.value, 50));
     setPage(0);
   };
 
@@ -110,8 +119,38 @@ const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercen
   };
 
 
+
+  // Filtering logic
+  const filteredFlags = flags.filter(flag => {
+    // Owner filter (case-insensitive substring)
+    const ownerName = ((flag._maintainer?.firstName || '') + ' ' + (flag._maintainer?.lastName || '')).toLowerCase();
+    if (filterOwner && !ownerName.includes(filterOwner.toLowerCase())) return false;
+
+    // Flag Name filter (case-insensitive substring)
+    if (filterFlagName && !(flag.name || '').toLowerCase().includes(filterFlagName.toLowerCase())) return false;
+
+    // Tag filter (case-insensitive substring, any tag)
+    if (filterTag && !(Array.isArray(flag.tags) && flag.tags.some(tag => tag.toLowerCase().includes(filterTag.toLowerCase())))) return false;
+
+    // Age filter (substring match)
+    if (filterAge && !String(flag.ageDays).toLowerCase().includes(filterAge.toLowerCase())) return false;
+
+    // Lifecycle filter (case-insensitive substring)
+    const lifecycle = Array.isArray(flag.lifecycleStage) ? flag.lifecycleStage[0] : flag.lifecycleStage;
+    if (filterLifecycle && !(String(lifecycle || '').toLowerCase().includes(filterLifecycle.toLowerCase()))) return false;
+
+    // Priority filter (substring match)
+    if (filterPriority && !String(flag.priorityScore).toLowerCase().includes(filterPriority.toLowerCase())) return false;
+
+    // Temporary filter (case-insensitive substring: 'yes'/'no')
+    const tempLabel = flag.temporary ? 'yes' : 'no';
+    if (filterTemporary && !tempLabel.toLowerCase().includes(filterTemporary.toLowerCase())) return false;
+
+    return true;
+  });
+
   // Show all flags passed in props (Live, Ready to Archive, Ready for Review)
-  const sortedFlags = stableSort(flags, getComparator(order, orderBy));
+  const sortedFlags = stableSort(filteredFlags, getComparator(order, orderBy));
   const paginatedFlags = sortedFlags.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
@@ -182,6 +221,86 @@ const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercen
                 >
                   Temporary
                 </TableSortLabel>
+              </TableCell>
+            </TableRow>
+            {/* Filter Row */}
+            <TableRow>
+              <TableCell>
+                <TextField
+                  variant="standard"
+                  size="small"
+                  placeholder="Filter Owner"
+                  value={filterOwner}
+                  onChange={e => setFilterOwner(e.target.value)}
+                  fullWidth
+                  InputProps={{ style: { fontSize: 13 } }}
+                />
+              </TableCell>
+              <TableCell>
+                <TextField
+                  variant="standard"
+                  size="small"
+                  placeholder="Filter Flag Name"
+                  value={filterFlagName}
+                  onChange={e => setFilterFlagName(e.target.value)}
+                  fullWidth
+                  InputProps={{ style: { fontSize: 13 } }}
+                />
+              </TableCell>
+              <TableCell>
+                <TextField
+                  variant="standard"
+                  size="small"
+                  placeholder="Filter Tag"
+                  value={filterTag}
+                  onChange={e => setFilterTag(e.target.value)}
+                  fullWidth
+                  InputProps={{ style: { fontSize: 13 } }}
+                />
+              </TableCell>
+              <TableCell align="center">
+                <TextField
+                  variant="standard"
+                  size="small"
+                  placeholder="Age"
+                  value={filterAge}
+                  onChange={e => setFilterAge(e.target.value)}
+                  inputProps={{ style: { fontSize: 13, textAlign: 'center' } }}
+                  sx={{ width: '80%' }}
+                />
+              </TableCell>
+              <TableCell align="center">
+                <TextField
+                  variant="standard"
+                  size="small"
+                  placeholder="Lifecycle"
+                  value={filterLifecycle}
+                  onChange={e => setFilterLifecycle(e.target.value)}
+                  sx={{ width: '90%' }}
+                  InputProps={{ style: { fontSize: 13 } }}
+                />
+              </TableCell>
+              <TableCell align="center">
+                <TextField
+                  variant="standard"
+                  size="small"
+                  placeholder="Priority"
+                  value={filterPriority}
+                  onChange={e => setFilterPriority(e.target.value)}
+                  inputProps={{ style: { fontSize: 13, textAlign: 'center' } }}
+                  sx={{ width: '80%' }}
+                />
+              </TableCell>
+              <TableCell align="center">
+                <TextField
+                  variant="standard"
+                  size="small"
+                  placeholder="Temporary"
+                  value={filterTemporary}
+                  onChange={e => setFilterTemporary(e.target.value)}
+                  sx={{ width: '90%' }}
+                  InputProps={{ style: { fontSize: 13 } }}
+                />
               </TableCell>
             </TableRow>
           </TableHead>
