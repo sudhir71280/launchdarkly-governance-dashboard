@@ -1,17 +1,7 @@
 // src/utils/flagUtils.js
 // Utility functions for flag analysis, lifecycle, priority, alerts, and CSV export
 
-export function analyzeFlags(flags) {
-    // Filter out archived flags from analysis
-    const nonArchivedFlags = flags.filter(flag => {
-        // Exclude flags with archived property set to true
-        if (flag.archived === true) return false;
-        // Also exclude flags with 'Archived' lifecycle stage
-        const lifecycle = Array.isArray(flag.lifecycleStage) ? flag.lifecycleStage[0] : flag.lifecycleStage;
-        if (lifecycle === 'Archived') return false;
-        return true;
-    });
-    
+export function analyzeFlags(flags) {    
     const currentTime = new Date();
     const analyzedFlags = [];
     const metrics = {
