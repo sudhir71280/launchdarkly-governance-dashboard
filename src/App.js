@@ -119,9 +119,9 @@ function App() {
         localStorage.setItem('launchdarkly_project_key', newConfig.projectKey);
     };
 
-    // Exports dashboard, agewise, and all flags data to Excel file
+    // Exports dashboard, agewise, and all flags data to Excel file (excluding archived flags)
     const handleExportExcel = () => {
-        exportDashboardToExcel(metrics, flagsData || [], true);
+        exportDashboardToExcel(metrics, flagsData || [], false);
     };
 
     return (

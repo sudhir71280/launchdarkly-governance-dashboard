@@ -122,6 +122,13 @@ const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercen
 
   // Filtering logic
   const filteredFlags = flags.filter(flag => {
+    // Exclude archived flags
+    if (flag.archived === true) return false;
+    
+    // Also exclude flags with 'Archived' lifecycle stage
+    const lifecycle = Array.isArray(flag.lifecycleStage) ? flag.lifecycleStage[0] : flag.lifecycleStage;
+    if (lifecycle === 'Archived') return false;
+
     // Owner filter (case-insensitive substring)
     const ownerName = ((flag._maintainer?.firstName || '') + ' ' + (flag._maintainer?.lastName || '')).toLowerCase();
     if (filterOwner && !ownerName.includes(filterOwner.toLowerCase())) return false;
@@ -136,7 +143,6 @@ const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercen
     if (filterAge && !String(flag.ageDays).toLowerCase().includes(filterAge.toLowerCase())) return false;
 
     // Lifecycle filter (case-insensitive substring)
-    const lifecycle = Array.isArray(flag.lifecycleStage) ? flag.lifecycleStage[0] : flag.lifecycleStage;
     if (filterLifecycle && !(String(lifecycle || '').toLowerCase().includes(filterLifecycle.toLowerCase()))) return false;
 
     // Priority filter (substring match)
@@ -410,7 +416,7 @@ const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercen
       <TablePagination
         rowsPerPageOptions={[10, 25, 50]}
         component="div"
-        count={flags.length}
+        count={filteredFlags.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
