@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogActions, Button, Typography, Box, Chip, Divider, Avatar } from '@mui/material';
-import { Flag, CalendarToday, AccessTime, Label, Category, Star, Archive } from '@mui/icons-material';
+import { Flag, CalendarToday, AccessTime, Label, Category, Archive } from '@mui/icons-material';
 
 const FlagDetailDialog = ({ open, flag, onClose, project = 'bff', lastUpdated = '' }) => {
     if (!flag) return null;
