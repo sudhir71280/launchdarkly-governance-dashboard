@@ -79,14 +79,7 @@ const FlagDetailDialog = ({ open, flag, onClose, project = 'bff', lastUpdated = 
                                     <Chip key={idx} label={stage} color={stage === 'Archived' ? 'error' : 'success'} size="small" sx={{ mr: 0.5 }} />
                                 ))
                                 : <Chip label={String(flag.lifecycleStage)} color={flag.lifecycleStage === 'Archived' ? 'error' : 'success'} size="small" />}
-                        </Box>
-                        {/* Priority */}
-                        <Box>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1976d2', mb: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <Star sx={{ fontSize: 18, color: '#1976d2' }} /> Priority
-                            </Typography>
-                            <Chip label={`${String(flag.priorityScore)}/10`} color={flag.priorityScore >= 7 ? 'error' : flag.priorityScore >= 4 ? 'warning' : 'success'} size="small" />
-                        </Box>
+                        </Box>                       
                     </Box>
                 </Box>
                 {/* Maintainer */}

@@ -1,5 +1,5 @@
 // src/utils/flagUtils.js
-// Utility functions for flag analysis, lifecycle, priority, alerts, and CSV export
+// Utility functions for flag analysis, lifecycle CSV export
 
 export function analyzeFlags(flags) {    
     const currentTime = new Date();
@@ -19,13 +19,11 @@ export function analyzeFlags(flags) {
         const creationDate = new Date(flag.creationDate);
         const ageDays = Math.floor((currentTime - creationDate) / (1000 * 60 * 60 * 24));
         const lifecycleStage = determineLifecycleStage(flag, ageDays);
-        const priorityScore = calculatePriorityScore(flag, ageDays);
         const analyzedFlag = {
             ...flag,
             ageDays,
             creationDate,
-            lifecycleStage,
-            priorityScore,
+            lifecycleStage
         };
         analyzedFlags.push(analyzedFlag);
         if (ageDays <= 30) {
@@ -58,8 +56,6 @@ export function analyzeFlags(flags) {
         }
     });
 
-    metrics.cleanupCandidates.sort((a, b) => b.priorityScore - a.priorityScore);
-
     return { flags: analyzedFlags, metrics };
 }
 
@@ -84,44 +80,6 @@ export function determineLifecycleStage(flag, ageDays) {
     }
 }
 
-export function calculatePriorityScore(flag, ageDays) {
-    // Priority scoring breakdown:
-    // - Age: Older flags are higher priority for cleanup
-    // - Temporary: Temporary flags are higher priority
-    // - Environment count: Fewer environments means easier cleanup
-
-    let score = 0;
-
-    if (flag.tags && flag.tags.includes('ReadyToArchive')) {
-        score += 10;
-    }
-
-    // Age scoring
-    // 0-30 days: 0 points (new flag)
-    // 31-90 days: +2 points
-    // 91-180 days: +4 points
-    // >180 days: +6 points
-    if (ageDays > 180) {
-        score += 6;
-    } else if (ageDays > 90) {
-        score += 4;
-    } else if (ageDays > 30) {
-        score += 2;
-    }
-    if (flag.temporary) {
-        score += 2;
-    }
-
-    // Environment count bonus
-    // Flags in 2 or fewer environments are easier to clean up
-    const envCount = Object.keys(flag.environments || {}).length;
-    if (envCount > 0 && envCount <= 2) {
-        score += 2;
-    }
-
-    // Cap score at 10 for dashboard consistency
-    return Math.min(score, 10);
-}
 
 export function exportCleanupCandidatesToCSV(cleanupCandidates) {
     const csvData = cleanupCandidates.map(flag => ({
@@ -130,7 +88,6 @@ export function exportCleanupCandidatesToCSV(cleanupCandidates) {
         'Tags': flag.tags?.join('|') || 'No tags',
         'Age (days)': flag.ageDays,
         'Lifecycle Stage': flag.lifecycleStage,
-        'Priority Score': flag.priorityScore,
         'Temporary': flag.temporary,
     }));
     const headers = Object.keys(csvData[0] || {}).join(',');

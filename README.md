@@ -25,7 +25,7 @@ A comprehensive React application for managing LaunchDarkly feature flag lifecyc
 ## 📊 Features
 
 - **Interactive Dashboard**: Real-time visualization of flag metrics
-- **Advanced Charts**: Lifecycle, age distribution, priority analysis
+- **Advanced Charts**: Lifecycle, age distribution
 - **Flag Management**: Cleanup recommendations and archival
 - **Governance Alerts**: Smart notifications for flag maintenance
 - **CSV Export**: Download cleanup reports

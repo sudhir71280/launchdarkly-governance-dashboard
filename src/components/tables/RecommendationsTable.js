@@ -19,14 +19,6 @@ function stringToColor(str) {
   return color;
 }
 
-const getPriorityColor = (score) => {
-  // Red for priority >7, warning for 4-7, success for <4
-  if (score > 7) return 'error';      // Red for lowest priority (8-10)
-  if (score >= 4 && score <= 7) return 'warning'; // Warning for medium priority (4-7)
-  if (score < 4) return 'success';    // Green for highest priority (1-3)
-  return 'default';
-};
-
 const getLifecycleColor = (stage) => {
   // Returns color for lifecycle stage
   switch (stage) {
@@ -37,7 +29,7 @@ const getLifecycleColor = (stage) => {
   }
 };
 
-const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercentage = 0 }) => {
+const RecommendationsTable = ({ flags, loading, metrics = {} }) => {
 
   // State for pagination, sorting, flag detail dialog, and filters
   const [page, setPage] = useState(0);
@@ -52,7 +44,6 @@ const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercen
   const [filterTag, setFilterTag] = useState('');
   const [filterAge, setFilterAge] = useState('');
   const [filterLifecycle, setFilterLifecycle] = useState('');
-  const [filterPriority, setFilterPriority] = useState('');
   const [filterTemporary, setFilterTemporary] = useState('');
 
   const handleChangePage = (event, newPage) => {
@@ -86,8 +77,6 @@ const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercen
         const bStage = Array.isArray(b.lifecycleStage) ? b.lifecycleStage[0] : b.lifecycleStage;
         return (bStage || '').localeCompare(aStage || '');
       }
-      case 'priority':
-        return b.priorityScore - a.priorityScore;
       case 'temporary':
         return (b.temporary === a.temporary) ? 0 : b.temporary ? 1 : -1;
       default:
@@ -144,9 +133,6 @@ const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercen
 
     // Lifecycle filter (case-insensitive substring)
     if (filterLifecycle && !(String(lifecycle || '').toLowerCase().includes(filterLifecycle.toLowerCase()))) return false;
-
-    // Priority filter (substring match)
-    if (filterPriority && !String(flag.priorityScore).toLowerCase().includes(filterPriority.toLowerCase())) return false;
 
     // Temporary filter (case-insensitive substring: 'yes'/'no')
     const tempLabel = flag.temporary ? 'yes' : 'no';
@@ -208,15 +194,6 @@ const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercen
                   onClick={() => handleRequestSort('lifecycleStage')}
                 >
                   Lifecycle Stage
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="center" sortDirection={orderBy === 'priority' ? order : false}>
-                <TableSortLabel
-                  active={orderBy === 'priority'}
-                  direction={orderBy === 'priority' ? order : 'asc'}
-                  onClick={() => handleRequestSort('priority')}
-                >
-                  Priority
                 </TableSortLabel>
               </TableCell>
               <TableCell align="center" sortDirection={orderBy === 'temporary' ? order : false}>
@@ -290,17 +267,6 @@ const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercen
                 <TextField
                   variant="standard"
                   size="small"
-                  placeholder="Priority"
-                  value={filterPriority}
-                  onChange={e => setFilterPriority(e.target.value)}
-                  inputProps={{ style: { fontSize: 13, textAlign: 'center' } }}
-                  sx={{ width: '80%' }}
-                />
-              </TableCell>
-              <TableCell align="center">
-                <TextField
-                  variant="standard"
-                  size="small"
                   placeholder="Temporary"
                   value={filterTemporary}
                   onChange={e => setFilterTemporary(e.target.value)}
@@ -311,16 +277,9 @@ const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercen
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedFlags.map((flag) => {
-              // Determine row color by priority
-              let rowBg = '';
-              if (flag.priorityScore >= 7) {
-                rowBg = 'rgba(255, 56, 56, 0.08)'; // High priority: light red
-              } else if (flag.priorityScore >= 4) {
-                rowBg = 'rgba(255, 215, 0, 0.10)'; // Medium priority: light yellow
-              }
+            {paginatedFlags.map((flag) => {              
               return (
-                <TableRow key={flag.key} hover sx={rowBg ? { background: rowBg } : {}}>
+                <TableRow key={flag.key}>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       {flag._maintainer?.firstName && flag._maintainer?.lastName ? (
@@ -388,13 +347,6 @@ const RecommendationsTable = ({ flags, loading, metrics = {}, highPriorityPercen
                     ) : (
                       <Chip label={flag.lifecycleStage} color={getLifecycleColor(flag.lifecycleStage)} size="small" />
                     )}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Chip
-                      label={`${flag.priorityScore}/10`}
-                      color={getPriorityColor(flag.priorityScore)}
-                      size="small"
-                    />
                   </TableCell>
                   <TableCell align="center">
                     <Chip
