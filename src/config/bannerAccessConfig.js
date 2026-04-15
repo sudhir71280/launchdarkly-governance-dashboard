@@ -4,13 +4,6 @@
 
 export const bannerAccessUsers = [
   'sudhir.sharma2@cnh.com',
-  'manish.tiwari@cnh.com',
   'ashwani.singh@cnh.com',
   'anshuman.srivastava@cnh.com',
-  'gauravkumar.bharadwaj@cnh.com',
-  'akarsh.maidargi@cnh.com',
-  'atul.ratnan@cnh.com',
-  'praveen.singh@cnh.com',
-  'nishith.agarwal@cnh.com',
-  'harpreet.rattu@cnh.com'
 ];

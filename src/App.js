@@ -71,13 +71,28 @@ function App() {
     // Check if VMS project is selected (for Banner Management tab visibility)
     const isVmsProject = config.projectKey?.toLowerCase() === 'vms';
 
+    // Auto-detect logged-in user email from LaunchDarkly API
+    const [loggedInEmail, setLoggedInEmail] = useState('');
+
+    useEffect(() => {
+        if (!config.apiToken) return;
+        const service = new LaunchDarklyService(config.apiToken);
+        service.fetchCallerIdentity().then((member) => {
+            if (member?.email) {
+                const email = member.email.trim().toLowerCase();
+                setLoggedInEmail(email);
+                localStorage.setItem('ld_current_user_email', email);
+            }
+        });
+    }, [config.apiToken]);
+
     // Check if current user has banner management access
     const hasBannerAccess = useMemo(() => {
         if (!isVmsProject) return false;
-        const currentUser = (localStorage.getItem('ld_current_user_email') || '').trim().toLowerCase();
+        const currentUser = loggedInEmail || (localStorage.getItem('ld_current_user_email') || '').trim().toLowerCase();
         if (!currentUser) return false;
         return bannerAccessUsers.map(e => e.toLowerCase()).includes(currentUser);
-    }, [isVmsProject]);
+    }, [isVmsProject, loggedInEmail]);
 
     // Snackbar for notifications
     const { enqueueSnackbar } = useSnackbar();

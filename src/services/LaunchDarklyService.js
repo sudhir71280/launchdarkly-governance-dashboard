@@ -86,6 +86,17 @@ export class LaunchDarklyService {
         }
     }
 
+    async fetchCallerIdentity() {
+        // Returns the account member associated with the current API token
+        try {
+            const response = await this.client.get('/members/me');
+            return response.data; // { email, firstName, lastName, role, ... }
+        } catch (error) {
+            // Fallback: some tokens may not have member access
+            return null;
+        }
+    }
+
     async fetchEnvironments() {
         // Fetches all environments for the configured project
         try {
