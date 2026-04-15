@@ -2,23 +2,33 @@ import React, { useState, useEffect } from 'react';
 // ---------------------------------------------
 // ConfigurationSidebar: Sidebar for dashboard settings and filters
 // ---------------------------------------------
-import { Box, Typography, Select, MenuItem, FormControl, Button, IconButton, Paper } from '@mui/material';
+import { Box, Typography, Select, MenuItem, FormControl, Button, IconButton, Paper, TextField } from '@mui/material';
 import { launchdarklyConfig } from '../../config/launchdarklyConfig';
 import LaunchDarklyService from '../../services/LaunchDarklyService';
 // Add environments to launchdarklyConfig if not present
-import { Close, Save, Settings, } from '@mui/icons-material';
+import { Close, Save, Settings } from '@mui/icons-material';
+
+const CURRENT_USER_KEY = 'ld_current_user_email';
 
 const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
   // Local state for form values and errors
   const [localConfig, setLocalConfig] = useState({
     ...config,
-    apiToken: config.apiToken || 'api-8a9c5d7c-2557-46a4-bb8c-5732643a2f4c',
+    apiToken: config.apiToken || launchdarklyConfig.apiTokens[0]?.value || '',
     projectKey: config.projectKey || '',
     includeArchived: true,
   });
 
   // No need to persist includeArchived, always true
   const [errors, setErrors] = useState({});
+
+  // Current user email for access control
+  const [currentUserEmail, setCurrentUserEmail] = useState(() => localStorage.getItem(CURRENT_USER_KEY) || '');
+
+  const handleCurrentUserChange = (email) => {
+    setCurrentUserEmail(email);
+    localStorage.setItem(CURRENT_USER_KEY, email.trim().toLowerCase());
+  };
 
   const [projectOptions, setProjectOptions] = useState(launchdarklyConfig.projectKeys || []);
   // Fetch projects from LaunchDarkly API when sidebar mounts or apiToken changes
@@ -87,6 +97,19 @@ const ConfigurationSidebar = ({ config, onConfigChange, onClose }) => {
           <Close />
         </IconButton>
       </Box>
+
+      {/* Your Identity */}
+      <Paper sx={{ p: 2, mb: 2 }}>
+        <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>Your Email</Typography>
+        <TextField
+          fullWidth
+          size="small"
+          value={currentUserEmail}
+          onChange={(e) => handleCurrentUserChange(e.target.value)}
+          placeholder="Enter your email to identify yourself"
+          helperText="Used to check your access to features like Banner Management"
+        />
+      </Paper>
       {/* API Configuration */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <FormControl fullWidth margin="normal" size="small" sx={{ disabled: 'disabled' }}>

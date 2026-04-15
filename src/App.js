@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ThemeProvider, createTheme, CssBaseline, Box, Container, Grid, Paper, Typography, AppBar, Toolbar, IconButton, Drawer, Button, Alert, Tab, Tabs } from '@mui/material';
-import { Flag, Menu, Download, AssignmentTurnedIn, Warning, Refresh } from '@mui/icons-material';
+import { Flag, Menu, Download, AssignmentTurnedIn, Warning, Refresh, Campaign } from '@mui/icons-material';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 
 // Import custom components
@@ -15,8 +15,11 @@ import TimelineChart from './components/charts/TimelineChart';
 import RecommendationsTable from './components/tables/RecommendationsTable';
 import ConfigurationSidebar from './components/layout/ConfigurationSidebar';
 import FlagGovernanceStandards from './components/FlagGovernanceStandards';
+import BannerManagement from './components/BannerManagement';
 import { CircularProgress } from '@mui/material';
 import { LaunchDarklyService } from './services/LaunchDarklyService';
+import { bannerAccessUsers } from './config/bannerAccessConfig';
+import { launchdarklyConfig } from './config/launchdarklyConfig';
 
 import './styles/App.css';
 import { analyzeFlags } from './utils/flagUtils';
@@ -61,9 +64,20 @@ function App() {
     const [flagsData, setFlagsData] = useState([]);
     const [metrics, setMetrics] = useState({});
     const [config, setConfig] = useState({
-        apiToken: localStorage.getItem('launchdarkly_api_token') || '',
+        apiToken: launchdarklyConfig.apiTokens[0]?.value || localStorage.getItem('launchdarkly_api_token') || '',
         projectKey: localStorage.getItem('launchdarkly_project_key') || '',
     });
+
+    // Check if VMS project is selected (for Banner Management tab visibility)
+    const isVmsProject = config.projectKey?.toLowerCase() === 'vms';
+
+    // Check if current user has banner management access
+    const hasBannerAccess = useMemo(() => {
+        if (!isVmsProject) return false;
+        const currentUser = (localStorage.getItem('ld_current_user_email') || '').trim().toLowerCase();
+        if (!currentUser) return false;
+        return bannerAccessUsers.map(e => e.toLowerCase()).includes(currentUser);
+    }, [isVmsProject]);
 
     // Snackbar for notifications
     const { enqueueSnackbar } = useSnackbar();
@@ -211,6 +225,7 @@ function App() {
                             <Tab icon={<Download sx={{ fontSize: 24, mr: 1 }} color="secondary" />} label="Charts" iconPosition="start" />
                             <Tab icon={<Warning sx={{ fontSize: 24, mr: 1 }} color="warning" />} label="Cleanup Recommendations" iconPosition="start" />
                             <Tab icon={<AssignmentTurnedIn sx={{ fontSize: 24, mr: 1 }} color="success" />} label="Overview" iconPosition="start" />
+                            {hasBannerAccess && <Tab icon={<Campaign sx={{ fontSize: 24, mr: 1, color: '#ed6c02' }} />} label="Banner Management" iconPosition="start" />}
                         </Tabs>
                     </Box>
                 </AppBar>
@@ -275,6 +290,16 @@ function App() {
                                 <TabPanel value={tabValue} index={3}>
                                     <FlagGovernanceStandards />
                                 </TabPanel>
+
+                                {/* Banner Management Tab - only for VMS project with access */}
+                                {hasBannerAccess && (
+                                    <TabPanel value={tabValue} index={4}>
+                                        <BannerManagement
+                                            launchDarklyService={launchDarklyService}
+                                            config={config}
+                                        />
+                                    </TabPanel>
+                                )}
                             </Paper>
                         </>
                     )}

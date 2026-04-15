@@ -3,6 +3,6 @@
 
 export const launchdarklyConfig = {
     apiTokens: [
-        { label: 'LaunchDarkly', value: 'api-8a9c5d7c-2557-46a4-bb8c-5732643a2f4c' }
+        { label: 'LaunchDarkly', value: process.env.REACT_APP_LD_API_TOKEN || ''}
     ] 
 };

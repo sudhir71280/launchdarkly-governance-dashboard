@@ -85,6 +85,71 @@ export class LaunchDarklyService {
             throw new Error(`Failed to fetch projects: ${error.response?.data?.message || error.message}`);
         }
     }
+
+    async fetchEnvironments() {
+        // Fetches all environments for the configured project
+        try {
+            const response = await this.client.get(`/projects/${this.projectKey}/environments`);
+            return response.data.items || [];
+        } catch (error) {
+            throw new Error(`Failed to fetch environments: ${error.response?.data?.message || error.message}`);
+        }
+    }
+
+    async updateFlagVariations(flagKey, variations) {
+        // Updates the variations (values) of a feature flag using JSON patch
+        try {
+            const patches = variations.map((variation, idx) => ({
+                op: 'replace',
+                path: `/variations/${idx}/value`,
+                value: variation.value,
+            }));
+            const response = await this.client.patch(`/flags/${this.projectKey}/${flagKey}`, {
+                patch: patches,
+            }, {
+                headers: { 'Content-Type': 'application/json',  },
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(`Failed to update flag variations: ${error.response?.data?.message || error.message}`);
+        }
+    }
+
+    async toggleFlagInEnvironment(flagKey, environmentKey, turnOn) {
+        // Toggles a flag on/off in a specific environment using semantic patch
+        try {
+            const instruction = turnOn
+                ? { kind: 'turnFlagOn' }
+                : { kind: 'turnFlagOff' };
+            const response = await this.client.patch(
+                `/flags/${this.projectKey}/${flagKey}`,
+                { environmentKey, instructions: [instruction] },
+                {
+                    headers: {
+                        'Content-Type': 'application/json; domain-model=launchdarkly.semanticpatch',
+                        'Authorization': this.apiToken,
+                    },
+                }
+            );
+            return response.data;
+        } catch (error) {
+            throw new Error(`Failed to toggle flag: ${error.response?.data?.message || error.message}`);
+        }
+    }
+
+    async updateFlagVariationValue(flagKey, variationIndex, newValue) {
+        // Updates a single variation value using JSON patch
+        try {
+            const response = await this.client.patch(
+                `/flags/${this.projectKey}/${flagKey}`,
+                [{ op: 'replace', path: `/variations/${variationIndex}/value`, value: newValue }],
+                { headers: { 'Content-Type': 'application/json' } }
+            );
+            return response.data;
+        } catch (error) {
+            throw new Error(`Failed to update variation: ${error.response?.data?.message || error.message}`);
+        }
+    }
 }
 
 export default LaunchDarklyService;
