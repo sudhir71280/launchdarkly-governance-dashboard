@@ -18,7 +18,6 @@ import FlagGovernanceStandards from './components/FlagGovernanceStandards';
 import BannerManagement from './components/BannerManagement';
 import { CircularProgress } from '@mui/material';
 import { LaunchDarklyService } from './services/LaunchDarklyService';
-import { bannerAccessUsers } from './config/bannerAccessConfig';
 import { launchdarklyConfig } from './config/launchdarklyConfig';
 
 import './styles/App.css';
@@ -71,27 +70,9 @@ function App() {
     // Check if VMS project is selected (for Banner Management tab visibility)
     const isVmsProject = config.projectKey?.toLowerCase() === 'vms';
 
-    // Get authenticated user email from Azure SWA identity
-    const [loggedInEmail, setLoggedInEmail] = useState('');
-
-    useEffect(() => {
-        fetch('/.auth/me')
-            .then(res => res.ok ? res.json() : null)
-            .then(data => {
-                const principal = data?.clientPrincipal;
-                if (principal?.userDetails) {
-                    setLoggedInEmail(principal.userDetails.trim().toLowerCase());
-                }
-            })
-            .catch(() => { /* auth endpoint not available in local dev */ });
-    }, []);
-
-    // Check if current user has banner management access
-    const hasBannerAccess = useMemo(() => {
-        if (!isVmsProject) return false;
-        if (!loggedInEmail) return false;
-        return bannerAccessUsers.map(e => e.toLowerCase()).includes(loggedInEmail);
-    }, [isVmsProject, loggedInEmail]);
+    // Banner Management access: available to all authenticated users when VMS project is selected
+    // Site-level access is controlled by Azure AD authentication on the SWA
+    const hasBannerAccess = isVmsProject;
 
     // Snackbar for notifications
     const { enqueueSnackbar } = useSnackbar();
