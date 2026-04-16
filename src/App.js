@@ -71,24 +71,19 @@ function App() {
     // Check if VMS project is selected (for Banner Management tab visibility)
     const isVmsProject = config.projectKey?.toLowerCase() === 'vms';
 
-    // Auto-detect logged-in user email
-    const [loggedInEmail, setLoggedInEmail] = useState(() =>
-        (localStorage.getItem('ld_current_user_email') || '').trim().toLowerCase()
-    );
+    // Get authenticated user email from Azure SWA identity
+    const [loggedInEmail, setLoggedInEmail] = useState('');
 
     useEffect(() => {
-        // Try Azure SWA authentication first (works when AAD is configured)
         fetch('/.auth/me')
             .then(res => res.ok ? res.json() : null)
             .then(data => {
                 const principal = data?.clientPrincipal;
                 if (principal?.userDetails) {
-                    const email = principal.userDetails.trim().toLowerCase();
-                    setLoggedInEmail(email);
-                    localStorage.setItem('ld_current_user_email', email);
+                    setLoggedInEmail(principal.userDetails.trim().toLowerCase());
                 }
             })
-            .catch(() => { /* SWA auth not available, rely on localStorage */ });
+            .catch(() => { /* auth endpoint not available in local dev */ });
     }, []);
 
     // Check if current user has banner management access
@@ -150,9 +145,6 @@ function App() {
         // Save to localStorage
         localStorage.setItem('launchdarkly_api_token', newConfig.apiToken);
         localStorage.setItem('launchdarkly_project_key', newConfig.projectKey);
-        // Refresh user email (may have been entered in sidebar)
-        const savedEmail = (localStorage.getItem('ld_current_user_email') || '').trim().toLowerCase();
-        if (savedEmail) setLoggedInEmail(savedEmail);
     };
 
     // Exports dashboard, agewise, and all flags data to Excel file (excluding archived flags)
