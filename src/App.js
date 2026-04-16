@@ -71,27 +71,31 @@ function App() {
     // Check if VMS project is selected (for Banner Management tab visibility)
     const isVmsProject = config.projectKey?.toLowerCase() === 'vms';
 
-    // Auto-detect logged-in user email from LaunchDarkly API
-    const [loggedInEmail, setLoggedInEmail] = useState('');
+    // Auto-detect logged-in user email
+    const [loggedInEmail, setLoggedInEmail] = useState(() =>
+        (localStorage.getItem('ld_current_user_email') || '').trim().toLowerCase()
+    );
 
     useEffect(() => {
-        if (!config.apiToken) return;
-        const service = new LaunchDarklyService(config.apiToken);
-        service.fetchCallerIdentity().then((member) => {
-            if (member?.email) {
-                const email = member.email.trim().toLowerCase();
-                setLoggedInEmail(email);
-                localStorage.setItem('ld_current_user_email', email);
-            }
-        });
-    }, [config.apiToken]);
+        // Try Azure SWA authentication first (works when AAD is configured)
+        fetch('/.auth/me')
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                const principal = data?.clientPrincipal;
+                if (principal?.userDetails) {
+                    const email = principal.userDetails.trim().toLowerCase();
+                    setLoggedInEmail(email);
+                    localStorage.setItem('ld_current_user_email', email);
+                }
+            })
+            .catch(() => { /* SWA auth not available, rely on localStorage */ });
+    }, []);
 
     // Check if current user has banner management access
     const hasBannerAccess = useMemo(() => {
         if (!isVmsProject) return false;
-        const currentUser = loggedInEmail || (localStorage.getItem('ld_current_user_email') || '').trim().toLowerCase();
-        if (!currentUser) return false;
-        return bannerAccessUsers.map(e => e.toLowerCase()).includes(currentUser);
+        if (!loggedInEmail) return false;
+        return bannerAccessUsers.map(e => e.toLowerCase()).includes(loggedInEmail);
     }, [isVmsProject, loggedInEmail]);
 
     // Snackbar for notifications
@@ -146,6 +150,9 @@ function App() {
         // Save to localStorage
         localStorage.setItem('launchdarkly_api_token', newConfig.apiToken);
         localStorage.setItem('launchdarkly_project_key', newConfig.projectKey);
+        // Refresh user email (may have been entered in sidebar)
+        const savedEmail = (localStorage.getItem('ld_current_user_email') || '').trim().toLowerCase();
+        if (savedEmail) setLoggedInEmail(savedEmail);
     };
 
     // Exports dashboard, agewise, and all flags data to Excel file (excluding archived flags)
