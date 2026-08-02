@@ -1,5 +1,6 @@
 # Dependencies
 /node_modules
+/api/node_modules
 /.pnp
 .pnp.js
 
@@ -23,6 +24,9 @@ yarn-error.log*
 
 # Environment variables
 .env
+
+# Azure Functions local settings (contains secrets, never commit)
+api/local.settings.json
 
 # IDE
 .vscode/
