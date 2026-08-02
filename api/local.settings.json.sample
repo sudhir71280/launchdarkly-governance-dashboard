@@ -1,0 +1,9 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "APIM_SUBSCRIPTION_KEY": "your-apim-subscription-key-here",
+    "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+  }
+}

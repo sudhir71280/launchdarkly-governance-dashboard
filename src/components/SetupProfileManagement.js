@@ -14,28 +14,17 @@ import {
   Add, Edit, Refresh, Save, Cancel, Person, Search, Clear,
 } from '@mui/icons-material';
 
-// In local dev, requests go through the CRA dev proxy (src/setupProxy.js),
-// which forwards to APIM server-side using a subscription key — fine for
-// local dev only, since this branch (and the key) is stripped from the
-// production bundle by CRA's dead-code elimination on NODE_ENV.
-// In production, requests go through the Azure Static Web Apps managed
-// Function at /api/CreateUpdateSetupProfile (see api/src/functions), which
-// forwards to APIM server-side using a key stored in Azure app settings —
-// never shipped to the browser. Both paths avoid the browser ever making a
-// cross-origin request to APIM directly, so no APIM CORS policy is needed.
-const IS_DEV = process.env.NODE_ENV === 'development';
-
-const CREATE_UPDATE_SETUP_PROFILE_URL = IS_DEV
-  ? '/apim-proxy/bff/dev/b2c/v1.0/Configurations/CreateUpdateSetupProfile'
-  : '/api/CreateUpdateSetupProfile';
+// Requests go through the Azure Static Web Apps managed Function at
+// /api/CreateUpdateSetupProfile (see api/src/functions), which forwards to
+// APIM server-side using a key stored in Azure app settings — never shipped
+// to the browser. The browser never calls APIM directly, so no APIM CORS
+// policy is needed. Locally, CRA's dev-server proxy (see the "proxy" field
+// in package.json) forwards /api/* to a Function host running on
+// http://localhost:7071 — start it with `npm run start:api`.
+const CREATE_UPDATE_SETUP_PROFILE_URL = '/api/CreateUpdateSetupProfile';
 
 const apimClient = axios.create({
-  headers: IS_DEV
-    ? {
-        'Content-Type': 'application/json-patch+json',
-        'Ocp-Apim-Subscription-Key': 'adb4a952c3fd4cd29210d087717cfad8',
-      }
-    : { 'Content-Type': 'application/json-patch+json' },
+  headers: { 'Content-Type': 'application/json-patch+json' },
 });
 
 // Calls CreateUpdateSetupProfile with the given payload.

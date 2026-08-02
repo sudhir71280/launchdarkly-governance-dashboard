@@ -4,7 +4,7 @@
   "private": true,
   "main": "src/functions/*.js",
   "scripts": {
-    "start": "func start"
+    "start": "npx --yes azure-functions-core-tools@4 start"
   },
   "dependencies": {
     "@azure/functions": "^4.5.1"
