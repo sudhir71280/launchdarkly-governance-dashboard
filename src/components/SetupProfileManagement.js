@@ -57,7 +57,7 @@ const ProfilesTableBody = memo(function ProfilesTableBody({ profiles, loading, o
   if (loading) {
     return (
       <TableRow>
-        <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
+        <TableCell colSpan={5} align="center" sx={{ py: 5 }}>
           <CircularProgress />
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             Loading profiles…
@@ -70,7 +70,7 @@ const ProfilesTableBody = memo(function ProfilesTableBody({ profiles, loading, o
   if (profiles.length === 0) {
     return (
       <TableRow>
-        <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
+        <TableCell colSpan={5} align="center" sx={{ py: 5 }}>
           <Typography variant="body2" color="text.secondary">
             {emptyMessage}
           </Typography>
@@ -102,8 +102,6 @@ const ProfilesTableBody = memo(function ProfilesTableBody({ profiles, loading, o
           sx={{ fontWeight: 600 }}
         />
       </TableCell>
-      <TableCell>{profile.createdBy}</TableCell>
-      <TableCell>{profile.modifiedBy}</TableCell>
       <TableCell>{profile.owner}</TableCell>
       <TableCell>
         <Tooltip title="Edit">
@@ -207,11 +205,6 @@ const SetupProfileManagement = () => {
       }
     }
     if (!formData.Owner.trim()) errors.Owner = 'Owner is required.';
-    if (isEditMode) {
-      if (!formData.ModifiedBy.trim()) errors.ModifiedBy = 'Modified By is required.';
-    } else if (!formData.CreatedBy.trim()) {
-      errors.CreatedBy = 'Created By is required.';
-    }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -335,7 +328,7 @@ const SetupProfileManagement = () => {
         <Table size="medium">
           <TableHead>
             <TableRow sx={{ background: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)' }}>
-              {['Name', 'Active Directory ID', 'Status', 'Created By', 'Modified By', 'Owner', 'Actions'].map((header) => (
+              {['Name', 'Active Directory ID', 'Status', 'Owner', 'Actions'].map((header) => (
                 <TableCell
                   key={header}
                   sx={{ color: '#fff', fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap' }}
@@ -407,29 +400,6 @@ const SetupProfileManagement = () => {
               helperText={formErrors.Owner}
               inputProps={{ maxLength: 100 }}
             />
-            {isEditMode ? (
-              <TextField
-                label="Modified By"
-                value={formData.ModifiedBy}
-                onChange={(e) => handleFieldChange('ModifiedBy', e.target.value)}
-                fullWidth
-                required
-                error={Boolean(formErrors.ModifiedBy)}
-                helperText={formErrors.ModifiedBy}
-                inputProps={{ maxLength: 100 }}
-              />
-            ) : (
-              <TextField
-                label="Created By"
-                value={formData.CreatedBy}
-                onChange={(e) => handleFieldChange('CreatedBy', e.target.value)}
-                fullWidth
-                required
-                error={Boolean(formErrors.CreatedBy)}
-                helperText={formErrors.CreatedBy}
-                inputProps={{ maxLength: 100 }}
-              />
-            )}
             <FormControlLabel
               control={
                 <Switch
