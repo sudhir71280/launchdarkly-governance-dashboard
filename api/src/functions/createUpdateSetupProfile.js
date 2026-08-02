@@ -11,7 +11,7 @@ const APIM_PATH = '/bff/dev/b2c/v1.0/Configurations/CreateUpdateSetupProfile';
 app.http('createUpdateSetupProfile', {
   methods: ['POST'],
   authLevel: 'anonymous',
-  route: 'api/CreateUpdateSetupProfile',
+  route: 'CreateUpdateSetupProfile',
   handler: async (request, context) => {
     const subscriptionKey = process.env.APIM_SUBSCRIPTION_KEY;
     if (!subscriptionKey) {

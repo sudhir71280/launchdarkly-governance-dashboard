@@ -128,31 +128,12 @@ const SetupProfileManagement = () => {
   const [success, setSuccess] = useState('');
   const [searchText, setSearchText] = useState('');
   const [debouncedSearchText, setDebouncedSearchText] = useState('');
-  const [currentUser, setCurrentUser] = useState('');
 
   // Form dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [formErrors, setFormErrors] = useState({});
-
-  // Looks up the signed-in user via the Azure Static Web Apps identity
-  // endpoint, so new profiles can default Owner/Created By to whoever is
-  // logged in rather than requiring manual entry.
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const response = await fetch('/.auth/me');
-        if (!response.ok) return;
-        const payload = await response.json();
-        setCurrentUser(payload?.clientPrincipal?.userDetails || '');
-      } catch {
-        // No identity available (e.g. local dev without SWA auth emulation) —
-        // leave currentUser blank so the fields fall back to manual entry.
-      }
-    };
-    fetchCurrentUser();
-  }, []);
 
   // ------------------------------------------------------------------
   // API calls
@@ -215,7 +196,7 @@ const SetupProfileManagement = () => {
   };
 
   const openCreateDialog = () => {
-    setFormData({ ...EMPTY_FORM, CreatedBy: currentUser, Owner: currentUser });
+    setFormData(EMPTY_FORM);
     setFormErrors({});
     setIsEditMode(false);
     setDialogOpen(true);
