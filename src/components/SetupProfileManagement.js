@@ -42,6 +42,11 @@ const EMPTY_FORM = {
   Owner: '',
 };
 
+// Active Directory IDs are formatted like "username@domain" — different
+// domain suffixes still refer to the same person, so uniqueness is checked
+// on the part before the "@" only, case-insensitively.
+const getAdIdPrefix = (value) => (value || '').split('@')[0].trim().toLowerCase();
+
 // ---------------------------------------------------------------------------
 // Memoized row list. Opening/closing the edit dialog only changes dialog and
 // form state on the parent, which would otherwise re-render and re-diff all
@@ -189,8 +194,24 @@ const SetupProfileManagement = () => {
   const validateForm = () => {
     const errors = {};
     if (!formData.Name.trim()) errors.Name = 'Name is required.';
-    if (!formData.ActiveDirectoryID.trim()) errors.ActiveDirectoryID = 'Active Directory ID is required.';
+    if (!formData.ActiveDirectoryID.trim()) {
+      errors.ActiveDirectoryID = 'Active Directory ID is required.';
+    } else {
+      const newPrefix = getAdIdPrefix(formData.ActiveDirectoryID);
+      const isDuplicate = profiles.some((profile) => {
+        if (isEditMode && profile.id === formData.RowKey) return false;
+        return getAdIdPrefix(profile.activeDirectoryID) === newPrefix;
+      });
+      if (isDuplicate) {
+        errors.ActiveDirectoryID = 'This Active Directory ID is already added.';
+      }
+    }
     if (!formData.Owner.trim()) errors.Owner = 'Owner is required.';
+    if (isEditMode) {
+      if (!formData.ModifiedBy.trim()) errors.ModifiedBy = 'Modified By is required.';
+    } else if (!formData.CreatedBy.trim()) {
+      errors.CreatedBy = 'Created By is required.';
+    }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -392,6 +413,9 @@ const SetupProfileManagement = () => {
                 value={formData.ModifiedBy}
                 onChange={(e) => handleFieldChange('ModifiedBy', e.target.value)}
                 fullWidth
+                required
+                error={Boolean(formErrors.ModifiedBy)}
+                helperText={formErrors.ModifiedBy}
                 inputProps={{ maxLength: 100 }}
               />
             ) : (
@@ -400,6 +424,9 @@ const SetupProfileManagement = () => {
                 value={formData.CreatedBy}
                 onChange={(e) => handleFieldChange('CreatedBy', e.target.value)}
                 fullWidth
+                required
+                error={Boolean(formErrors.CreatedBy)}
+                helperText={formErrors.CreatedBy}
                 inputProps={{ maxLength: 100 }}
               />
             )}
