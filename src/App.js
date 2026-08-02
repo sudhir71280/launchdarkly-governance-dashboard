@@ -68,11 +68,12 @@ function App() {
         projectKey: localStorage.getItem('launchdarkly_project_key') || '',
     });
 
-    // Check if VMS project is selected (for Banner Management tab visibility)
+    // Check if VMS project is selected (for Banner Management / Setup Profiles tab visibility)
     const isVmsProject = config.projectKey?.toLowerCase() === 'vms';
 
-    // Banner Management access: available to all authenticated users when VMS project is selected
-    // Site-level access is controlled by Azure AD authentication on the SWA
+    // Banner Management and Setup Profiles access: available to all authenticated
+    // users when VMS project is selected. Site-level access is controlled by
+    // Azure AD authentication on the SWA
     const hasBannerAccess = isVmsProject;
 
     // Snackbar for notifications
@@ -222,7 +223,7 @@ function App() {
                             <Tab icon={<Warning sx={{ fontSize: 24, mr: 1 }} color="warning" />} label="Cleanup Recommendations" iconPosition="start" />
                             <Tab icon={<AssignmentTurnedIn sx={{ fontSize: 24, mr: 1 }} color="success" />} label="Overview" iconPosition="start" />
                             {hasBannerAccess && <Tab icon={<Campaign sx={{ fontSize: 24, mr: 1, color: '#ed6c02' }} />} label="Banner Management" iconPosition="start" />}
-                            <Tab icon={<ManageAccounts sx={{ fontSize: 24, mr: 1 }} color="primary" />} label="Setup Profiles" iconPosition="start" />
+                            {hasBannerAccess && <Tab icon={<ManageAccounts sx={{ fontSize: 24, mr: 1 }} color="primary" />} label="Setup Profiles" iconPosition="start" />}
                         </Tabs>
                     </Box>
                 </AppBar>
@@ -298,10 +299,12 @@ function App() {
                                     </TabPanel>
                                 )}
 
-                                {/* Setup Profile Management Tab */}
-                                <TabPanel value={tabValue} index={hasBannerAccess ? 5 : 4}>
-                                    <SetupProfileManagement />
-                                </TabPanel>
+                                {/* Setup Profile Management Tab - only for VMS project with access */}
+                                {hasBannerAccess && (
+                                    <TabPanel value={tabValue} index={5}>
+                                        <SetupProfileManagement />
+                                    </TabPanel>
+                                )}
                             </Paper>
                         </>
                     )}

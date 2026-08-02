@@ -252,7 +252,7 @@ const SetupProfileManagement = () => {
           placeholder="Search profiles by name, AD ID, status, owner…"
           size="medium"
           fullWidth
-          sx={{ backgroundColor: '#fff' }}
+          sx={{ backgroundColor: '#fff', '& .MuiOutlinedInput-root': { height: 48 } }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -275,7 +275,7 @@ const SetupProfileManagement = () => {
               startIcon={loading ? <CircularProgress size={16} /> : <Refresh />}
               onClick={fetchProfiles}
               disabled={loading}
-              sx={{ fontWeight: 600, whiteSpace: 'nowrap', height: 56 }}
+              sx={{ fontWeight: 600, whiteSpace: 'nowrap', height: 48 }}
             >
               Refresh
             </Button>
@@ -288,7 +288,7 @@ const SetupProfileManagement = () => {
           sx={{
             fontWeight: 700,
             whiteSpace: 'nowrap',
-            height: 56,
+            height: 48,
             background: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)',
             '&:hover': { background: 'linear-gradient(90deg, #1565c0 0%, #1976d2 100%)' },
           }}
