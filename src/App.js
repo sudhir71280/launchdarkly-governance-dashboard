@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ThemeProvider, createTheme, CssBaseline, Box, Container, Grid, Paper, Typography, AppBar, Toolbar, IconButton, Drawer, Button, Alert, Tab, Tabs } from '@mui/material';
-import { Flag, Menu, Download, AssignmentTurnedIn, Warning, Refresh, Campaign } from '@mui/icons-material';
+import { Flag, Menu, Download, AssignmentTurnedIn, Warning, Refresh, Campaign, ManageAccounts } from '@mui/icons-material';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 
 // Import custom components
@@ -16,6 +16,7 @@ import RecommendationsTable from './components/tables/RecommendationsTable';
 import ConfigurationSidebar from './components/layout/ConfigurationSidebar';
 import FlagGovernanceStandards from './components/FlagGovernanceStandards';
 import BannerManagement from './components/BannerManagement';
+import SetupProfileManagement from './components/SetupProfileManagement';
 import { CircularProgress } from '@mui/material';
 import { LaunchDarklyService } from './services/LaunchDarklyService';
 import { launchdarklyConfig } from './config/launchdarklyConfig';
@@ -29,7 +30,7 @@ const theme = createTheme({
     palette: {
         mode: 'light',
         primary: {
-            main: '#dde5eeff',
+            main: '#1976d2',
         },
         secondary: {
             main: '#dc004e',
@@ -221,6 +222,7 @@ function App() {
                             <Tab icon={<Warning sx={{ fontSize: 24, mr: 1 }} color="warning" />} label="Cleanup Recommendations" iconPosition="start" />
                             <Tab icon={<AssignmentTurnedIn sx={{ fontSize: 24, mr: 1 }} color="success" />} label="Overview" iconPosition="start" />
                             {hasBannerAccess && <Tab icon={<Campaign sx={{ fontSize: 24, mr: 1, color: '#ed6c02' }} />} label="Banner Management" iconPosition="start" />}
+                            <Tab icon={<ManageAccounts sx={{ fontSize: 24, mr: 1 }} color="primary" />} label="Setup Profiles" iconPosition="start" />
                         </Tabs>
                     </Box>
                 </AppBar>
@@ -295,6 +297,11 @@ function App() {
                                         />
                                     </TabPanel>
                                 )}
+
+                                {/* Setup Profile Management Tab */}
+                                <TabPanel value={tabValue} index={hasBannerAccess ? 5 : 4}>
+                                    <SetupProfileManagement />
+                                </TabPanel>
                             </Paper>
                         </>
                     )}
